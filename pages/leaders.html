@@ -8,15 +8,25 @@
 </head>
 <body>
   <header class="topbar">
-  <div class="topbar-inner">
-    <h1>Leaders</h1>
-    <a class="home-link" href="../index.html">Home</a>
-  </div>
-</header>
+    <div class="topbar-inner">
+      <h1>Leaders</h1>
+      <a class="home-link" href="../index.html">Home</a>
+    </div>
+  </header>
 
   <main class="container">
-    <p>Worship leader page coming soon.</p>
-    <p><a href="../index.html">Back Home</a></p>
+    <section class="page-header">
+      <h2>Worship Leaders</h2>
+      <p>View active and inactive leaders in the system.</p>
+    </section>
+
+    <section class="controls">
+      <input type="text" id="leaderSearchInput" placeholder="Search leaders..." />
+    </section>
+
+    <section id="leaderList" class="song-list"></section>
   </main>
+
+  <script src="../assets/js/leaders.js"></script>
 </body>
 </html>
