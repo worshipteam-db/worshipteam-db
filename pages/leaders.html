@@ -17,11 +17,50 @@
   <main class="container">
     <section class="page-header">
       <h2>Worship Leaders</h2>
-      <p>View active and inactive leaders in the system.</p>
+      <p>Add, edit, and manage active or inactive leaders.</p>
     </section>
 
     <section class="controls">
       <input type="text" id="leaderSearchInput" placeholder="Search leaders..." />
+      <button id="toggleLeaderFormBtn" class="action-btn" type="button">Add Leader</button>
+    </section>
+
+    <section id="leaderFormSection" class="form-card hidden">
+      <h3 id="leaderFormTitle">Add Leader</h3>
+
+      <form id="leaderForm">
+        <input type="hidden" id="leaderId" />
+
+        <label>
+          <span class="label-text">
+            Leader Name
+            <span class="required-mark">*</span>
+          </span>
+          <input type="text" id="leaderName" required />
+        </label>
+
+        <label>
+          <span class="label-text">
+            Status
+            <span class="required-mark">*</span>
+          </span>
+          <select id="leaderStatus" required>
+            <option value="">Select status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </label>
+
+        <label>
+          Notes
+          <textarea id="leaderNotes" rows="3"></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="action-btn">Save Leader</button>
+          <button type="button" id="cancelLeaderFormBtn" class="secondary-btn">Cancel</button>
+        </div>
+      </form>
     </section>
 
     <section id="leaderList" class="song-list"></section>
