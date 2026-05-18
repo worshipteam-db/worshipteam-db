@@ -1,112 +1,215 @@
 # WorshipTeam DB
 
-A web-based worship team management system designed for churches to organize songs, worship leaders, weekly setlists, and music planning for services.
+A Full-Stack Worship Ministry Planning System Built For Real Church Workflows.
 
 ---
 
-## ✨ Project Overview
+## ✨ Live Application
 
-WorshipTeam DB is a centralized platform for worship ministries to keep track of songs that have been sung, songs planned for upcoming services, worship leaders, song keys, and weekly schedules.
+🌐 Live Site:  
+https://worshipteam-db.vercel.app/
 
-The goal of the project is to simplify communication and preparation between worship leaders and instrumental members by providing a shared planning system that everyone can access.
+📱 Installable As A Mobile App (PWA)
 
 ---
 
-## 🎵 Core Features
+## 🎵 Project Overview
 
-### Song Database
-- Store all worship songs in a centralized database
-- Track songs that have been sung previously
-- Add future songs for upcoming services
-- Save song details such as:
+WorshipTeam DB is a real-world worship ministry management and planning system designed for churches to organize songs, worship leaders, service schedules, and weekly worship preparation.
+
+The platform was built to simplify communication between worship leaders and instrumental members by replacing traditional group-chat-based planning with a centralized cloud-based application.
+
+The system is now:
+- Fully deployed online
+- Responsive across desktop and mobile devices
+- Installable as a phone app (PWA)
+- Powered by a shared cloud database
+- Designed for real ministry use
+
+---
+
+# ✨ Current Features
+
+## 🎼 Song Database
+- Centralized worship song management
+- Store:
   - Song title
-  - Original key
-  - Preferred worship key
+  - Original artist
   - Language
-  - Category (Praise / Worship / Special Song / etc.)
-  - Notes and comments
+  - Song categories/tags
+  - Notes
+  - YouTube references
+- Support for multiple tags per song
+- Search and filter functionality
+- Responsive mobile card layout
+- Smart categorized song selection
 
 ---
 
-### Worship Leader Management
-- Create profiles for worship leaders
-- Allow each worship leader to maintain their own song list
-- Track which songs are commonly led by specific leaders
-- Allow leaders to add new songs to the system
+## 👥 Worship Leader Management
+- Add and edit worship leaders
+- Active/inactive leader tracking
+- Shared cloud-based leader data
+- Real-time updates across devices
 
 ---
 
-### Weekly Worship Calendar
-- Calendar-based scheduling system for weekly services
-- Worship leaders can populate songs for upcoming schedules
-- Display:
-  - Service date
-  - Song leader
-  - Selected songs
-  - Song keys
-  - Additional notes
+## 📅 Weekly Worship Calendar
+- Monthly calendar planning system
+- Sunday-focused worship scheduling
+- Rehearsal visualization
+- Mobile-friendly compact calendar mode
+- Saved Sunday archive/history
+- Future Sunday planning support
+- Duplicate Sunday prevention
 
 ---
 
-### Music Team Coordination
-- Instrumental members can view upcoming setlists
-- Team members can confirm songs in advance
-- Improve preparation and communication before services
-- Reduce last-minute song/key changes
+## 🎹 Worship Planning Intelligence
+The application includes intelligent worship planning features powered by historical service data.
+
+### Smart Key Memory
+- Automatically remembers previously used worship keys
+- Tracks leader-specific song keys
+- Suggests commonly used keys during lineup planning
+
+### Song Intelligence Panel
+Displays:
+- Most used key
+- Last used key
+- Last used date
+- Previous service history
+- Key usage frequency
 
 ---
 
-### Filtering & Search
-Songs can be filtered and searched by:
-- Language
-- Song key
-- Praise/Worship category
-- Worship leader
-- Recently used songs
-- Service date
+## 📚 Archive System
+- Browse previously saved services
+- View historical worship lineups
+- Open archived Sundays directly in the planner
+- Search historical services
 
 ---
 
-## 🚀 Future Plans
-
-Planned features for future development may include:
-- Chord sheet uploads
-- PDF or file attachments
-- Song history analytics
-- Mobile-friendly interface
-- User authentication and permissions
-- Notifications and reminders
-- Drag-and-drop calendar scheduling
-- Integration with presentation software
-- Dark mode support
+## 📱 Responsive Mobile Experience
+- Mobile-first responsive layouts
+- Compact mobile calendar mode
+- Installable PWA support
+- Optimized forms and card layouts
+- Mobile-friendly navigation and controls
 
 ---
 
-## 🛠️ Tech Stack (Planned)
-
-The technology stack is still being decided, but may include:
-- Frontend: React / Next.js
-- Backend: Node.js / Express
-- Database: PostgreSQL or MongoDB
-- Authentication: Firebase Auth or JWT
-- Hosting: Vercel / Render / Railway
+## ☁️ Cloud Database & Shared Access
+- Shared Supabase cloud database
+- Multi-device synchronization
+- Shared church planning workflow
+- Real-time accessible data across devices
 
 ---
 
-## 📌 Project Status
+# 🛠️ Tech Stack
 
-This project is currently in the planning and early development stage.
-
-Features and structure may continue to evolve as the project grows.
-
----
-
-## 🙌 Purpose
-
-The purpose of this project is to help worship ministries stay organized, improve team coordination, and make weekly service preparation more efficient and accessible.
+## Frontend
+- HTML5
+- CSS3
+- Vanilla JavaScript
+- Responsive CSS Architecture
+- Lucide Icons
 
 ---
 
-## 📖 License
+## Backend / Database
+- Supabase
+- PostgreSQL
+- Row Level Security (RLS)
+- RPC Functions
 
-This project is open for personal and church use.
+---
+
+## Deployment & Hosting
+- Vercel
+- GitHub
+- Automatic Deployments
+- HTTPS
+
+---
+
+## Progressive Web App (PWA)
+- Installable Mobile App
+- Web App Manifest
+- Service Worker
+- Standalone App Launch
+- Mobile App Icons
+
+---
+
+# 🚀 Development Highlights
+
+This project evolved from:
+- A simple concept idea
+- Into a fully deployed production-style web application
+
+Development included:
+- LocalStorage prototyping
+- Full Supabase migration
+- Responsive redesign
+- PWA conversion
+- Shared cloud architecture
+- Mobile optimization
+- Dynamic calendar workflows
+- Historical worship intelligence
+
+---
+
+# 📌 Current Project Status
+
+✅ Fully Functional  
+✅ Live Deployment Complete  
+✅ Mobile Responsive  
+✅ Installable Phone App  
+✅ Cloud Database Integrated  
+✅ Production Workflow Operational
+
+The project is actively usable and may continue to evolve with future enhancements.
+
+---
+
+# 🔮 Planned Future Enhancements
+
+Potential future improvements include:
+- Authentication and role-based permissions
+- Admin-only management controls
+- Worship analytics dashboards
+- Export tools (PDF / CSV)
+- Audit logs and edit history
+- Offline caching improvements
+- Advanced realtime collaboration
+- Additional ministry service support
+- Chord sheet attachments
+- Presentation software integrations
+
+---
+
+# 🙌 Purpose
+
+The purpose of WorshipTeam DB is to help worship ministries:
+- Stay organized
+- Improve communication
+- Reduce preparation friction
+- Coordinate musicians more efficiently
+- Preserve worship service history
+- Simplify weekly planning workflows
+
+---
+
+# 📖 License
+
+This project is open for personal, educational, and church ministry use.
+
+---
+
+
+# 👨‍💻 Developer
+
+Developed By Glenn Bernard Pimentel
