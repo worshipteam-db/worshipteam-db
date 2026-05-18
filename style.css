@@ -3240,3 +3240,6 @@ a {
     min-height: 96px;
   }
 }
+html {
+  overscroll-behavior-y: none;
+}
