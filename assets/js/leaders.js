@@ -98,8 +98,14 @@ function initLeadersPage() {
         <p><strong>Status:</strong> ${statusLabel}</p>
         <p><strong>Notes:</strong> ${leader.notes || "None"}</p>
         <div class="card-actions">
-          <button class="action-btn edit-leader-btn" data-id="${leader.id}" type="button">Edit</button>
-          <button class="secondary-btn delete-leader-btn" data-id="${leader.id}" type="button">Delete</button>
+         <button class="action-btn edit-leader-btn" data-id="${leader.id}" type="button">
+  <i data-lucide="pencil"></i>
+  <span>Edit</span>
+</button>
+         <button class="secondary-btn delete-leader-btn" data-id="${leader.id}" type="button">
+  <i data-lucide="trash-2"></i>
+  <span>Delete</span>
+</button>
         </div>
       `;
 
@@ -162,6 +168,7 @@ function initLeadersPage() {
     });
 
     renderLeaders(filteredLeaders);
+    lucide.createIcons();
   }
 
   async function loadAndRenderLeaders() {

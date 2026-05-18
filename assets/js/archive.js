@@ -163,7 +163,10 @@ function renderArchive(services, leaders, songs, serviceSongs) {
         <button type="button" class="action-btn open-service-btn" data-date="${service.serviceDate}">
           Open
         </button>
-        <button type="button" class="secondary-btn delete-service-btn" data-id="${service.id}">
+       <button type="button" class="secondary-btn delete-service-btn" data-id="${service.id}">
+  <i data-lucide="trash-2"></i>
+  <span>Delete</span>
+</button>
           Delete
         </button>
       </div>
@@ -235,6 +238,7 @@ async function loadArchivePage() {
     });
 
     renderArchive(filteredServices, leaders, songs, serviceSongs);
+    lucide.createIcons();
   } catch (error) {
     console.error("Failed to load archive:", error);
     document.getElementById("archiveList").innerHTML =

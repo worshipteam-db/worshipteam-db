@@ -10,7 +10,7 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand-home" href="index.html" aria-label="Home">
-        <span class="home-icon" aria-hidden="true">🏠</span>
+        <i data-lucide="house" class="home-icon"></i>
         <span class="brand-text">WorshipTeam DB</span>
       </a>
     </div>
@@ -32,10 +32,22 @@
     </section>
 
     <nav class="dashboard-tabs" aria-label="Primary navigation">
-      <a class="dashboard-tab tab-songs" href="pages/songs.html">Songs</a>
-      <a class="dashboard-tab tab-leaders" href="pages/leaders.html">Leaders</a>
-      <a class="dashboard-tab tab-archive" href="pages/archive.html">Archive</a>
-      <a class="dashboard-tab tab-stack" href="stack.html">Stack</a>
+     <a class="dashboard-tab tab-songs" href="pages/songs.html">
+  <i data-lucide="music-4"></i>
+  <span>Songs</span>
+</a>
+      <a class="dashboard-tab tab-leaders" href="pages/leaders.html">
+        <i data-lucide="users"></i>
+        <span>Leaders</span>
+      </a>
+      <a class="dashboard-tab tab-archive" href="pages/archive.html">
+        <i data-lucide="archive"></i>
+        <span>Archive</span>
+      </a>
+      <a class="dashboard-tab tab-stack" href="stack.html">
+        <i data-lucide="cpu"></i>
+        <span>Stack</span>
+      </a>
     </nav>
 
     <section class="calendar-shell">
@@ -60,5 +72,10 @@
   1 Corinthians 10:31 — “So whether you eat or drink or whatever you do, do it all for the glory of God.”
 </span>
   </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+  lucide.createIcons();
+</script>
 </body>
 </html>

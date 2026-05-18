@@ -147,7 +147,10 @@ function initSongsPage() {
         }</p>
         <p><strong>Notes:</strong> ${song.notes || "None"}</p>
         <div class="card-actions">
-          <button class="action-btn edit-btn" data-id="${song.id}" type="button">Edit</button>
+          <button class="action-btn edit-btn" data-id="${song.id}" type="button">
+  <i data-lucide="pencil"></i>
+  <span>Edit</span>
+</button>
           
         </div>
       `;
@@ -214,6 +217,7 @@ function initSongsPage() {
     });
 
     renderSongs(filteredSongs);
+    lucide.createIcons();
   }
 
   languageButtons.forEach((button) => {
