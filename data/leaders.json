@@ -1,0 +1,20 @@
+[
+  {
+    "id": "leader-001",
+    "name": "Leader A",
+    "active": true,
+    "notes": ""
+  },
+  {
+    "id": "leader-002",
+    "name": "Leader B",
+    "active": true,
+    "notes": ""
+  },
+  {
+    "id": "leader-003",
+    "name": "Leader C",
+    "active": false,
+    "notes": "Inactive for now"
+  }
+]

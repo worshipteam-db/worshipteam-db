@@ -1,0 +1,24 @@
+[
+  {
+    "id": "service-2026-05-17",
+    "serviceDate": "2026-05-17",
+    "leaderId": "leader-001",
+    "status": "final",
+    "songs": [
+      {
+        "category": "opening",
+        "songId": "song-001",
+        "customTitle": "Song A",
+        "key": "G",
+        "notes": ""
+      },
+      {
+        "category": "praise",
+        "songId": "song-002",
+        "customTitle": "Song B",
+        "key": "A",
+        "notes": ""
+      }
+    ]
+  }
+]

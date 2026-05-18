@@ -1,0 +1,18 @@
+[
+  {
+    "id": "song-001",
+    "title": "Song A",
+    "tags": ["opening", "praise", "worship"],
+    "language": "English",
+    "youtubeLink": "",
+    "notes": ""
+  },
+  {
+    "id": "song-002",
+    "title": "Song B",
+    "tags": ["worship", "ministry"],
+    "language": "English",
+    "youtubeLink": "https://www.youtube.com/watch?v=example",
+    "notes": ""
+  }
+]
