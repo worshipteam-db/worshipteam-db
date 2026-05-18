@@ -3134,3 +3134,88 @@ a {
     font-size: 0.9rem;
   }
 }
+
+@media (max-width: 720px) {
+  #songList .song-card {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 12px;
+    row-gap: 8px;
+    padding: 14px !important;
+    align-items: start;
+  }
+
+  #songList .song-card h3 {
+    grid-column: 1 / -1;
+    margin-bottom: 2px !important;
+    font-size: 1.08rem;
+    line-height: 1.2;
+  }
+
+  #songList .song-card p {
+    margin: 0 !important;
+    line-height: 1.25;
+    font-size: 0.86rem;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  #songList .song-card p:nth-of-type(1),
+  #songList .song-card p:nth-of-type(2),
+  #songList .song-card p:nth-of-type(3),
+  #songList .song-card p:nth-of-type(4) {
+    grid-column: span 1;
+  }
+
+  #songList .song-card p:nth-of-type(5) {
+    grid-column: 1 / -1;
+  }
+
+  #songList .song-card .card-actions {
+    grid-column: 1 / -1;
+    margin-top: 8px !important;
+    gap: 10px;
+  }
+
+  #songList .song-card .card-actions button {
+    width: 100%;
+    height: 46px;
+  }
+}
+
+@media (max-width: 720px) {
+  .controls {
+    gap: 10px;
+  }
+
+  .controls input {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 52px;
+  }
+
+  .controls .action-btn {
+    width: 100%;
+    height: 52px;
+  }
+}
+
+@media (max-width: 720px) {
+  .controls {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .controls input[type="text"] {
+    width: 100% !important;
+    max-width: none !important;
+    flex: 1 1 auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .controls button {
+    width: 100% !important;
+  }
+}
