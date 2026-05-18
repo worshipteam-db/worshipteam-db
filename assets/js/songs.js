@@ -1,43 +1,53 @@
-const SONG_STORAGE_KEY = "worshipteam_songs";
+const SONG_TABLE = "songs";
 
-const defaultSongs = [
-  {
-    id: "song-001",
-    title: "You Are The Greatest",
-    originalArtist: "Hillsong",
-    tags: ["opening", "praise", "worship"],
-    language: "English",
-    youtubeLink: "",
-    notes: ""
-  },
-  {
-    id: "song-002",
-    title: "You Are The Greatest",
-    originalArtist: "Planetshakers",
-    tags: ["worship", "ministry"],
-    language: "English",
-    youtubeLink: "https://www.youtube.com/watch?v=example",
-    notes: ""
-  }
-];
+function getSupabaseClient() {
+  if (window.supabaseClient) return window.supabaseClient;
+  if (window.supabase && typeof window.supabase.from === "function") return window.supabase;
 
-function getSongs() {
-  const storedSongs = localStorage.getItem(SONG_STORAGE_KEY);
-
-  if (storedSongs) {
-    return JSON.parse(storedSongs);
-  }
-
-  localStorage.setItem(SONG_STORAGE_KEY, JSON.stringify(defaultSongs));
-
-  return defaultSongs;
+  throw new Error(
+    "Supabase client not found. Make sure your Supabase client script loads before songs.js."
+  );
 }
 
-function saveSongs(songs) {
-  localStorage.setItem(SONG_STORAGE_KEY, JSON.stringify(songs));
+function mapSongFromDb(row) {
+  return {
+    id: row.id,
+    title: row.title || "",
+    originalArtist: row.original_artist || "",
+    language: row.language || "",
+    tags: Array.isArray(row.tags) ? row.tags : [],
+    youtubeLink: row.youtube_link || "",
+    notes: row.notes || ""
+  };
 }
 
-function generateSongId() {
+function mapSongToDb(song) {
+  return {
+    title: song.title,
+    original_artist: song.originalArtist,
+    language: song.language,
+    tags: song.tags,
+    youtube_link: song.youtubeLink || "",
+    notes: song.notes || ""
+  };
+}
+
+async function fetchSongs() {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(SONG_TABLE)
+    .select("id, title, original_artist, language, tags, youtube_link, notes, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data || []).map(mapSongFromDb);
+}
+
+function generateClientSideId() {
   return `song-${Date.now()}`;
 }
 
@@ -49,7 +59,6 @@ function initSongsPage() {
   const songForm = document.getElementById("songForm");
   const cancelFormBtn = document.getElementById("cancelFormBtn");
   const formTitle = document.getElementById("formTitle");
-  const tagError = document.getElementById("tagError");
 
   const songIdInput = document.getElementById("songId");
   const songTitleInput = document.getElementById("songTitle");
@@ -58,26 +67,13 @@ function initSongsPage() {
   const songYoutubeInput = document.getElementById("songYoutube");
   const songNotesInput = document.getElementById("songNotes");
 
+  const tagCheckboxes = Array.from(document.querySelectorAll(".tag-checkbox"));
   const languageButtons = Array.from(
     document.querySelectorAll("#languageOptions .choice-btn")
   );
+  const tagButtons = Array.from(document.querySelectorAll("#tagOptions .tag-btn"));
 
-  const tagButtons = Array.from(
-    document.querySelectorAll("#tagOptions .tag-btn")
-  );
-
-  let songs = getSongs();
-
-  function setLanguage(value) {
-    songLanguageInput.value = value;
-
-    languageButtons.forEach((button) => {
-      button.classList.toggle(
-        "selected",
-        button.dataset.value === value
-      );
-    });
-  }
+  let songs = [];
 
   function getSelectedTags() {
     return tagButtons
@@ -87,16 +83,24 @@ function initSongsPage() {
 
   function setSelectedTags(tags = []) {
     tagButtons.forEach((button) => {
-      button.classList.toggle(
-        "selected",
-        tags.includes(button.dataset.value)
-      );
+      button.classList.toggle("selected", tags.includes(button.dataset.value));
+    });
+
+    tagCheckboxes.forEach((checkbox) => {
+      checkbox.checked = tags.includes(checkbox.value);
+    });
+  }
+
+  function setLanguage(value) {
+    songLanguageInput.value = value;
+
+    languageButtons.forEach((button) => {
+      button.classList.toggle("selected", button.dataset.value === value);
     });
   }
 
   function openForm(song = null) {
     songFormSection.classList.remove("hidden");
-
     formTitle.textContent = song ? "Edit Song" : "Add Song";
 
     songIdInput.value = song ? song.id : "";
@@ -108,8 +112,6 @@ function initSongsPage() {
     setLanguage(song ? song.language : "");
     setSelectedTags(song ? song.tags || [] : []);
 
-    tagError.classList.add("hidden");
-
     window.scrollTo({
       top: songFormSection.offsetTop - 20,
       behavior: "smooth"
@@ -118,16 +120,10 @@ function initSongsPage() {
 
   function closeForm() {
     songFormSection.classList.add("hidden");
-
     songForm.reset();
-
     songIdInput.value = "";
-
     setLanguage("");
     setSelectedTags([]);
-
-    tagError.classList.add("hidden");
-
     formTitle.textContent = "Add Song";
   }
 
@@ -141,48 +137,20 @@ function initSongsPage() {
 
     filteredSongs.forEach((song) => {
       const card = document.createElement("div");
-
       card.className = "song-card";
 
       card.innerHTML = `
         <h3>${song.title}</h3>
-
-        <p>
-          <strong>Original Artist:</strong>
-          ${song.originalArtist || "N/A"}
-        </p>
-
-        <p>
-          <strong>Language:</strong>
-          ${song.language || "N/A"}
-        </p>
-
-        <p>
-          <strong>Tags:</strong>
-          ${(song.tags || []).join(", ") || "None"}
-        </p>
-
-        <p>
-          <strong>YouTube:</strong>
-          ${
-            song.youtubeLink
-              ? `<a href="${song.youtubeLink}" target="_blank" rel="noopener noreferrer">Open link</a>`
-              : "None"
-          }
-        </p>
-
-        <p>
-          <strong>Notes:</strong>
-          ${song.notes || "None"}
-        </p>
-
-        <button
-          class="action-btn edit-btn"
-          data-id="${song.id}"
-          type="button"
-        >
-          Edit
-        </button>
+        <p><strong>Original Artist:</strong> ${song.originalArtist || "N/A"}</p>
+        <p><strong>Language:</strong> ${song.language || "N/A"}</p>
+        <p><strong>Tags:</strong> ${(song.tags || []).join(", ") || "None"}</p>
+        <p><strong>YouTube:</strong> ${
+          song.youtubeLink
+            ? `<a href="${song.youtubeLink}" target="_blank" rel="noopener noreferrer">Open link</a>`
+            : "None"
+        }</p>
+        <p><strong>Notes:</strong> ${song.notes || "None"}</p>
+        <button class="action-btn edit-btn" data-id="${song.id}" type="button">Edit</button>
       `;
 
       songList.appendChild(card);
@@ -191,12 +159,8 @@ function initSongsPage() {
     document.querySelectorAll(".edit-btn").forEach((button) => {
       button.addEventListener("click", () => {
         const songId = button.getAttribute("data-id");
-
         const song = songs.find((item) => item.id === songId);
-
-        if (song) {
-          openForm(song);
-        }
+        if (song) openForm(song);
       });
     });
   }
@@ -205,28 +169,12 @@ function initSongsPage() {
     const query = searchInput.value.toLowerCase();
 
     const filteredSongs = songs.filter((song) => {
-      const titleMatch = song.title
-        .toLowerCase()
-        .includes(query);
+      const titleMatch = song.title.toLowerCase().includes(query);
+      const artistMatch = (song.originalArtist || "").toLowerCase().includes(query);
+      const tagMatch = (song.tags || []).some((tag) => tag.toLowerCase().includes(query));
+      const languageMatch = (song.language || "").toLowerCase().includes(query);
 
-      const artistMatch = (song.originalArtist || "")
-        .toLowerCase()
-        .includes(query);
-
-      const tagMatch = (song.tags || []).some((tag) =>
-        tag.toLowerCase().includes(query)
-      );
-
-      const languageMatch = (song.language || "")
-        .toLowerCase()
-        .includes(query);
-
-      return (
-        titleMatch ||
-        artistMatch ||
-        tagMatch ||
-        languageMatch
-      );
+      return titleMatch || artistMatch || tagMatch || languageMatch;
     });
 
     renderSongs(filteredSongs);
@@ -235,7 +183,6 @@ function initSongsPage() {
   languageButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const isSelected = button.classList.contains("selected");
-
       const value = button.dataset.value;
 
       if (isSelected) {
@@ -249,13 +196,65 @@ function initSongsPage() {
   tagButtons.forEach((button) => {
     button.addEventListener("click", () => {
       button.classList.toggle("selected");
-
       const selectedTags = getSelectedTags();
-
       if (selectedTags.length > 0) {
-        tagError.classList.add("hidden");
+        const tagError = document.getElementById("tagError");
+        if (tagError) tagError.classList.add("hidden");
       }
     });
+  });
+
+  songForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const title = songTitleInput.value.trim();
+    const originalArtist = songArtistInput.value.trim();
+    const language = songLanguageInput.value.trim();
+    const tags = getSelectedTags();
+    const youtubeLink = songYoutubeInput.value.trim();
+    const notes = songNotesInput.value.trim();
+
+    const tagError = document.getElementById("tagError");
+    if (!tags.length) {
+      if (tagError) tagError.classList.remove("hidden");
+      return;
+    }
+
+    const payload = mapSongToDb({
+      title,
+      originalArtist,
+      language,
+      tags,
+      youtubeLink,
+      notes
+    });
+
+    try {
+      const supabase = getSupabaseClient();
+
+      if (songIdInput.value) {
+        const { error } = await supabase
+          .from(SONG_TABLE)
+          .update(payload)
+          .eq("id", songIdInput.value)
+          .select();
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from(SONG_TABLE)
+          .insert([payload])
+          .select();
+
+        if (error) throw error;
+      }
+
+      await loadAndRenderSongs();
+      closeForm();
+    } catch (error) {
+      console.error("Song save failed:", error);
+      alert(error.message);;
+    }
   });
 
   toggleFormBtn.addEventListener("click", () => {
@@ -267,51 +266,19 @@ function initSongsPage() {
   });
 
   cancelFormBtn.addEventListener("click", closeForm);
-
-  songForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const selectedLanguage = songLanguageInput.value.trim();
-
-    const selectedTags = getSelectedTags();
-
-    if (selectedTags.length === 0) {
-      tagError.classList.remove("hidden");
-      return;
-    }
-
-    tagError.classList.add("hidden");
-
-    const newSong = {
-      id: songIdInput.value || generateSongId(),
-      title: songTitleInput.value.trim(),
-      originalArtist: songArtistInput.value.trim(),
-      language: selectedLanguage,
-      tags: selectedTags,
-      youtubeLink: songYoutubeInput.value.trim(),
-      notes: songNotesInput.value.trim()
-    };
-
-    const existingIndex = songs.findIndex(
-      (song) => song.id === newSong.id
-    );
-
-    if (existingIndex >= 0) {
-      songs[existingIndex] = newSong;
-    } else {
-      songs.unshift(newSong);
-    }
-
-    saveSongs(songs);
-
-    closeForm();
-
-    applySearch();
-  });
-
   searchInput.addEventListener("input", applySearch);
 
-  renderSongs(songs);
+  async function loadAndRenderSongs() {
+    try {
+      songs = await fetchSongs();
+      applySearch();
+    } catch (error) {
+      console.error("Failed to load songs:", error);
+      songList.innerHTML = "<p>Could not load songs from Supabase.</p>";
+    }
+  }
+
+  loadAndRenderSongs();
 }
 
-initSongsPage();
+document.addEventListener("DOMContentLoaded", initSongsPage);
