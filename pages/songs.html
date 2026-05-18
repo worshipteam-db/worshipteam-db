@@ -8,20 +8,103 @@
 </head>
 <body>
   <header class="topbar">
-  <div class="topbar-inner">
-    <h1>Songs</h1>
-    <a class="home-link" href="../index.html">Home</a>
-  </div>
-</header>
+    <div class="topbar-inner">
+      <h1>Songs</h1>
+      <a class="home-link" href="../index.html">Home</a>
+    </div>
+  </header>
 
   <main class="container">
     <section class="page-header">
       <h2>Song Catalog</h2>
-      <p>Browse songs that have been used or may be used for future services.</p>
+      <p>Browse, add, and edit worship songs.</p>
     </section>
 
     <section class="controls">
       <input type="text" id="searchInput" placeholder="Search songs..." />
+      <button id="toggleFormBtn" class="action-btn" type="button">Add Song</button>
+    </section>
+
+    <section id="songFormSection" class="form-card hidden">
+      <h3 id="formTitle">Add Song</h3>
+
+      <form id="songForm">
+        <input type="hidden" id="songId" />
+
+        <label>
+          <span class="label-text">
+            Song Title
+            <span class="required-mark">*</span>
+          </span>
+
+          <input type="text" id="songTitle" required />
+        </label>
+
+        <label>
+          <span class="label-text">
+            Original Artist
+            <span class="required-mark">*</span>
+          </span>
+
+          <input type="text" id="songArtist" required />
+        </label>
+
+        <fieldset class="choice-group">
+          <legend>
+            <span class="label-text">
+              Language
+              <span class="required-mark">*</span>
+            </span>
+          </legend>
+
+          <input type="hidden" id="songLanguage" required />
+
+          <div class="choice-row" id="languageOptions">
+            <button type="button" class="choice-btn" data-value="English">English</button>
+            <button type="button" class="choice-btn" data-value="Tagalog">Tagalog</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="choice-group">
+          <legend>
+            <span class="label-text">
+              Tags
+              <span class="required-mark">*</span>
+            </span>
+          </legend>
+
+          <p class="helper-text">
+            Can select multiple.
+          </p>
+
+          <div class="choice-row choice-wrap" id="tagOptions">
+            <button type="button" class="choice-btn tag-btn" data-value="opening">Opening</button>
+            <button type="button" class="choice-btn tag-btn" data-value="praise">Praise</button>
+            <button type="button" class="choice-btn tag-btn" data-value="worship">Worship</button>
+            <button type="button" class="choice-btn tag-btn" data-value="ministry">Ministry</button>
+            <button type="button" class="choice-btn tag-btn" data-value="victory">Victory</button>
+          </div>
+
+          <p id="tagError" class="error-text hidden">
+            Please select at least one tag.
+          </p>
+        </fieldset>
+
+        <label>
+          YouTube Link
+          <input type="url" id="songYoutube" placeholder="https://..." />
+        </label>
+
+        <label>
+          Notes
+          <textarea id="songNotes" rows="3"></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="action-btn">Save Song</button>
+          <button type="button" id="cancelFormBtn" class="secondary-btn">Cancel</button>
+        </div>
+      </form>
     </section>
 
     <section id="songList" class="song-list"></section>
