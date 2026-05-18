@@ -3243,3 +3243,77 @@ a {
 html {
   overscroll-behavior-y: none;
 }
+
+.stack-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stack-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  border-radius: 999px;
+}
+
+.stack-front::before {
+  background: #63c0ff;
+}
+
+.stack-backend::before {
+  background: #79f2c0;
+}
+
+.stack-deploy::before {
+  background: #d39cff;
+}
+
+.stack-intelligence::before {
+  background: #ffb15c;
+}
+
+.stack-roadmap::before {
+  background: #ff6b7d;
+}
+
+.stack-pill {
+  font-weight: 800;
+  border-width: 1px;
+}
+
+.stack-blue {
+  border-color: rgba(99, 192, 255, 0.38);
+  background: rgba(99, 192, 255, 0.08);
+  color: #d8f1ff;
+}
+
+.stack-cyan {
+  border-color: rgba(127, 216, 255, 0.38);
+  background: rgba(127, 216, 255, 0.08);
+  color: #e5f9ff;
+}
+
+.stack-orange {
+  border-color: rgba(255, 177, 92, 0.38);
+  background: rgba(255, 177, 92, 0.08);
+  color: #ffe2be;
+}
+
+.stack-purple {
+  border-color: rgba(211, 156, 255, 0.38);
+  background: rgba(211, 156, 255, 0.08);
+  color: #f0deff;
+}
+
+.stack-green {
+  border-color: rgba(121, 242, 192, 0.38);
+  background: rgba(121, 242, 192, 0.08);
+  color: #dbfff0;
+}
+
+.stack-red {
+  border-color: rgba(255, 107, 125, 0.34);
+  background: rgba(255, 107, 125, 0.08);
+  color: #ffe2e7;
+}
