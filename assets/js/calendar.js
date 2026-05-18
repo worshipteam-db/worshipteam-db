@@ -302,9 +302,12 @@ function buildSongIntelligenceHTML(history) {
       `;
     })
     .join("");
-
-  return `
+return `
     <div class="song-intelligence">
+      <details>
+        <summary>Show History & Key Intelligence</summary>
+
+        <div class="song-intelligence-content">
       <div class="intelligence-grid">
         <div class="intelligence-box">
           <small>Most Used Key</small>
@@ -335,6 +338,8 @@ function buildSongIntelligenceHTML(history) {
           ${historyHTML}
         </div>
       </div>
+           </div>
+      </details>
     </div>
   `;
 }
@@ -843,6 +848,19 @@ function renderCalendar() {
         }
 
         renderCalendar();
+
+        if (window.innerWidth <= 720) {
+  const target = document.getElementById("selectedSundayCard");
+
+  if (target) {
+    setTimeout(() => {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }, 120);
+  }
+}
       });
     }
 
