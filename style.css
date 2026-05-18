@@ -152,7 +152,61 @@ a {
 }
 
 .song-block {
-  margin-top: 18px;
+  margin-top: 18px;.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.home-link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 8px;
+}
+
+.home-link:hover {
+  background: rgba(255,255,255,0.12);
+}.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.home-link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 8px;
+}
+
+.home-link:hover {
+  background: rgba(255,255,255,0.12);
+}.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.home-link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 8px;
+}
+
+.home-link:hover {
+  background: rgba(255,255,255,0.12);
+}
 }
 
 .mini-card {

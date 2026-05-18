@@ -7,15 +7,26 @@
   <link rel="stylesheet" href="../style.css" />
 </head>
 <body>
- <header class="topbar">
-  <div class="topbar-inner">
-    <h1>Archive</h1>
-    <a class="home-link" href="../index.html">Home</a>
-  </div>
-</header>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1>Archive</h1>
+      <a class="home-link" href="../index.html">Home</a>
+    </div>
+  </header>
+
   <main class="container">
-    <p>Past service archive page coming soon.</p>
-    <p><a href="../index.html">Back Home</a></p>
+    <section class="page-header">
+      <h2>Past Service Archive</h2>
+      <p>Review past Sunday services, leaders, and song lineups.</p>
+    </section>
+
+    <section class="controls">
+      <input type="text" id="archiveSearchInput" placeholder="Search archive by date or leader..." />
+    </section>
+
+    <section id="archiveList" class="song-list"></section>
   </main>
+
+  <script src="../assets/js/archive.js"></script>
 </body>
 </html>
