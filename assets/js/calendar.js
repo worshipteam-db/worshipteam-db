@@ -769,7 +769,9 @@ function renderCalendar() {
     const dayOfWeek = date.getDay();
     const isSunday = dayOfWeek === 0;
     const isSaturday = dayOfWeek === 6;
-    const isSelected = selectedDate === dateString;
+    const todayString = toDateInputValue(new Date());
+const isToday = todayString === dateString;
+const isSelected = selectedDate === dateString;
     const nextSunday = new Date(year, month, day + 1);
 
     const cell = document.createElement("button");
@@ -782,7 +784,8 @@ function renderCalendar() {
     if (isSaturday) cell.classList.add("is-saturday");
     if (!isSunday && !isSaturday) cell.classList.add("weekday-cell-type");
     if (service) cell.classList.add("has-service");
-    if (isSelected) cell.classList.add("is-selected");
+    if (isToday) cell.classList.add("is-today");
+if (isSelected) cell.classList.add("is-selected");
 
     cell.innerHTML = `
       <span class="day-number">${day}</span>

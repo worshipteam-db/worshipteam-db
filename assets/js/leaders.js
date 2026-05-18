@@ -97,7 +97,10 @@ function initLeadersPage() {
         <h3>${leader.name}</h3>
         <p><strong>Status:</strong> ${statusLabel}</p>
         <p><strong>Notes:</strong> ${leader.notes || "None"}</p>
-        <button class="action-btn edit-leader-btn" data-id="${leader.id}" type="button">Edit</button>
+        <div class="card-actions">
+          <button class="action-btn edit-leader-btn" data-id="${leader.id}" type="button">Edit</button>
+          <button class="secondary-btn delete-leader-btn" data-id="${leader.id}" type="button">Delete</button>
+        </div>
       `;
 
       leaderList.appendChild(card);
@@ -108,6 +111,41 @@ function initLeadersPage() {
         const leaderId = button.getAttribute("data-id");
         const leader = leaders.find((item) => item.id === leaderId);
         if (leader) openForm(leader);
+      });
+    });
+
+    document.querySelectorAll(".delete-leader-btn").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const leaderId = button.getAttribute("data-id");
+        const leader = leaders.find((item) => item.id === leaderId);
+        if (!leader) return;
+
+        const confirmed = window.confirm(`Delete leader "${leader.name}"?`);
+        if (!confirmed) return;
+
+        try {
+          const supabase = getSupabaseClient();
+
+          const { error } = await supabase
+            .from(LEADER_TABLE)
+            .delete()
+            .eq("id", leaderId)
+            .select("id");
+
+          if (error) throw error;
+
+          await loadAndRenderLeaders();
+               } catch (error) {
+          console.error("Leader delete failed:", error);
+
+          const friendlyMessage =
+            error?.message?.includes("services_leader_id_fkey") ||
+            error?.message?.includes("violates foreign key constraint")
+              ? "This leader is still being used in one or more saved Sundays. Please edit or delete those service records first."
+              : error.message || "Could not delete the leader.";
+
+          alert(friendlyMessage);
+        }
       });
     });
   }

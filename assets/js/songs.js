@@ -47,10 +47,6 @@ async function fetchSongs() {
   return (data || []).map(mapSongFromDb);
 }
 
-function generateClientSideId() {
-  return `song-${Date.now()}`;
-}
-
 function initSongsPage() {
   const songList = document.getElementById("songList");
   const searchInput = document.getElementById("searchInput");
@@ -150,7 +146,10 @@ function initSongsPage() {
             : "None"
         }</p>
         <p><strong>Notes:</strong> ${song.notes || "None"}</p>
-        <button class="action-btn edit-btn" data-id="${song.id}" type="button">Edit</button>
+        <div class="card-actions">
+          <button class="action-btn edit-btn" data-id="${song.id}" type="button">Edit</button>
+          
+        </div>
       `;
 
       songList.appendChild(card);
@@ -161,6 +160,43 @@ function initSongsPage() {
         const songId = button.getAttribute("data-id");
         const song = songs.find((item) => item.id === songId);
         if (song) openForm(song);
+      });
+    });
+
+    document.querySelectorAll(".delete-btn").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const songId = button.getAttribute("data-id");
+        const song = songs.find((item) => item.id === songId);
+        if (!song) return;
+
+        const confirmed = window.confirm(
+          `Delete "${song.title}" by ${song.originalArtist || "Unknown Artist"}?`
+        );
+        if (!confirmed) return;
+
+        try {
+          const supabase = getSupabaseClient();
+
+          const { error } = await supabase
+            .from(SONG_TABLE)
+            .delete()
+            .eq("id", songId)
+            .select("id");
+
+          if (error) throw error;
+
+          await loadAndRenderSongs();
+               } catch (error) {
+          console.error("Song delete failed:", error);
+
+          const friendlyMessage =
+            error?.message?.includes("service_songs_song_id_fkey") ||
+            error?.message?.includes("violates foreign key constraint")
+              ? "This song is still being used in one or more saved Sundays. Please edit or delete those service records first."
+              : error.message || "Could not delete the song.";
+
+          alert(friendlyMessage);
+        }
       });
     });
   }
@@ -253,7 +289,7 @@ function initSongsPage() {
       closeForm();
     } catch (error) {
       console.error("Song save failed:", error);
-      alert(error.message);;
+      alert(error.message || "Could not save the song.");
     }
   });
 
