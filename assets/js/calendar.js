@@ -41,6 +41,12 @@ function formatDateDisplay(dateString) {
   });
 }
 
+function toMonthInputValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
 function toDateInputValue(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -48,10 +54,8 @@ function toDateInputValue(date) {
   return `${year}-${month}-${day}`;
 }
 
-function toMonthInputValue(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
+function isMobileCalendarView() {
+  return window.matchMedia("(max-width: 720px)").matches;
 }
 
 function mapLeaderFromDb(row) {
@@ -162,17 +166,25 @@ async function fetchServiceSongs() {
 }
 
 async function loadAllData() {
-  const [leaders, songs, services, serviceSongs] = await Promise.all([
+  const results = await Promise.allSettled([
     fetchLeaders(),
     fetchSongs(),
     fetchServices(),
     fetchServiceSongs()
   ]);
 
-  leadersCache = leaders;
-  songsCache = songs;
-  servicesCache = services;
-  serviceSongsCache = serviceSongs;
+  leadersCache = results[0].status === "fulfilled" ? results[0].value : [];
+  songsCache = results[1].status === "fulfilled" ? results[1].value : [];
+  servicesCache = results[2].status === "fulfilled" ? results[2].value : [];
+  serviceSongsCache = results[3].status === "fulfilled" ? results[3].value : [];
+
+  const names = ["leaders", "songs", "services", "service_songs"];
+
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
+      console.error(`Failed to load ${names[index]}:`, result.reason);
+    }
+  });
 }
 
 function renderLeaderOptions(selectEl, selectedLeaderId = "") {
@@ -727,7 +739,6 @@ function renderSelectedSundayCard(dateString) {
     }
   });
 }
-
 function renderCalendar() {
   const calendarGrid = document.getElementById("calendarGrid");
   const monthPicker = document.getElementById("monthPicker");
@@ -746,6 +757,7 @@ function renderCalendar() {
   );
 
   const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const todayString = toDateInputValue(new Date());
 
   calendarGrid.innerHTML = "";
 
@@ -769,10 +781,8 @@ function renderCalendar() {
     const dayOfWeek = date.getDay();
     const isSunday = dayOfWeek === 0;
     const isSaturday = dayOfWeek === 6;
-    const todayString = toDateInputValue(new Date());
-const isToday = todayString === dateString;
-const isSelected = selectedDate === dateString;
-    const nextSunday = new Date(year, month, day + 1);
+    const isSelected = selectedDate === dateString;
+    const isToday = todayString === dateString;
 
     const cell = document.createElement("button");
     cell.type = "button";
@@ -785,7 +795,9 @@ const isSelected = selectedDate === dateString;
     if (!isSunday && !isSaturday) cell.classList.add("weekday-cell-type");
     if (service) cell.classList.add("has-service");
     if (isToday) cell.classList.add("is-today");
-if (isSelected) cell.classList.add("is-selected");
+    if (isSelected) cell.classList.add("is-selected");
+
+    const nextSunday = new Date(year, month, day + 1);
 
     cell.innerHTML = `
       <span class="day-number">${day}</span>
@@ -837,7 +849,6 @@ if (isSelected) cell.classList.add("is-selected");
     calendarGrid.appendChild(cell);
   }
 }
-
 function resetFormForNewService(dateString = "") {
   const songRows = document.getElementById("songRows");
   const plannerTitle = document.getElementById("plannerTitle");
@@ -1145,6 +1156,7 @@ const requestedDate = urlParams.get("date");
     renderCalendar();
   });
 
+
   goToLeadersBtn.addEventListener("click", () => {
     autoSaveDraftFromForm();
     window.location.href = "leaders.html";
@@ -1216,7 +1228,7 @@ if (requestedDate) {
       refreshAllRowIntelligence();
     } catch (error) {
       console.error("Failed to initialize calendar:", error);
-      serviceError.textContent = "Could not load calendar data from Supabase.";
+      serviceError.textContent = "Could not load calendar data from Supabase.";serviceError.textContent = error.message || "Could not load calendar data from Supabase.";
       serviceError.classList.remove("hidden");
     }
   })();
