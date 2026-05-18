@@ -1724,3 +1724,78 @@ select {
 .history-row strong {
   color: #79f2c0;
 }
+
+.detail-line {
+  display: flex;
+  gap: 6px;
+  line-height: 1.45;
+  flex-wrap: wrap;
+}
+
+.detail-label {
+  font-weight: 800;
+}
+
+.detail-category {
+  color: #7fd0ff;
+}
+
+.detail-song {
+  color: #ffb15c;
+}
+
+.detail-artist {
+  color: #d3a6ff;
+}
+
+.detail-key {
+  color: #79f2c0;
+}
+
+.detail-notes {
+  color: #ff8aa1;
+}
+
+.selected-service-actions .secondary-btn {
+  border-color: rgba(217, 75, 90, 0.45);
+  color: #ffb8bf;
+  background: linear-gradient(180deg, #2f1a1e 0%, #251216 100%);
+}
+
+.selected-service-actions .secondary-btn:hover {
+  border-color: rgba(217, 75, 90, 0.9);
+  background: linear-gradient(180deg, #3b1d22 0%, #291418 100%);
+}
+
+.selected-song-chip {
+  border: 1px solid rgba(255, 159, 67, 0.45);
+  background: linear-gradient(180deg, #2a2017 0%, #20180f 100%);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.selected-song-chip div {
+  display: grid;
+  gap: 4px;
+}
+
+.selected-song-chip strong {
+  color: #ffb15c;
+}
+
+.selected-song-chip span,
+.selected-song-chip small {
+  color: #c6b6a6;
+}
+
+.selected-song-chip .secondary-btn {
+  border-color: rgba(255, 159, 67, 0.5);
+}
+
+.selected-song-chip .secondary-btn:hover {
+  border-color: rgba(255, 159, 67, 0.9);
+}

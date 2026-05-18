@@ -1,25 +1,21 @@
-const LEADER_STORAGE_KEY = "worshipteam_leaders";
-const SONG_STORAGE_KEY = "worshipteam_songs";
-const SERVICE_STORAGE_KEY = "worshipteam_services";
+const LEADER_TABLE = "leaders";
+const SONG_TABLE = "songs";
+const SERVICE_TABLE = "services";
+const SERVICE_SONG_TABLE = "service_songs";
 const DRAFT_STORAGE_KEY = "worshipteam_service_draft";
 
-function getLeaders() {
-  const storedLeaders = localStorage.getItem(LEADER_STORAGE_KEY);
-  return storedLeaders ? JSON.parse(storedLeaders) : [];
-}
+let leadersCache = [];
+let songsCache = [];
+let servicesCache = [];
+let serviceSongsCache = [];
 
-function getSongs() {
-  const storedSongs = localStorage.getItem(SONG_STORAGE_KEY);
-  return storedSongs ? JSON.parse(storedSongs) : [];
-}
+function getSupabaseClient() {
+  if (window.supabaseClient) return window.supabaseClient;
+  if (window.supabase && typeof window.supabase.from === "function") return window.supabase;
 
-function getServices() {
-  const storedServices = localStorage.getItem(SERVICE_STORAGE_KEY);
-  return storedServices ? JSON.parse(storedServices) : [];
-}
-
-function saveServices(services) {
-  localStorage.setItem(SERVICE_STORAGE_KEY, JSON.stringify(services));
+  throw new Error(
+    "Supabase client not found. Make sure your Supabase client script loads before calendar.js."
+  );
 }
 
 function getDraft() {
@@ -33,14 +29,6 @@ function saveDraft(draft) {
 
 function clearDraft() {
   localStorage.removeItem(DRAFT_STORAGE_KEY);
-}
-
-function generateServiceId() {
-  return `service-${Date.now()}`;
-}
-
-function generateRowId() {
-  return `row-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 }
 
 function formatDateDisplay(dateString) {
@@ -66,34 +54,178 @@ function toMonthInputValue(date) {
   return `${year}-${month}`;
 }
 
+function mapLeaderFromDb(row) {
+  return {
+    id: row.id,
+    name: row.name || "",
+    status: row.status || "active",
+    notes: row.notes || ""
+  };
+}
+
+function mapSongFromDb(row) {
+  return {
+    id: row.id,
+    title: row.title || "",
+    originalArtist: row.original_artist || "",
+    language: row.language || "",
+    tags: Array.isArray(row.tags) ? row.tags : [],
+    youtubeLink: row.youtube_link || "",
+    notes: row.notes || ""
+  };
+}
+
+function mapServiceFromDb(row) {
+  return {
+    id: row.id,
+    serviceDate: row.service_date,
+    leaderId: row.leader_id,
+    createdAt: row.created_at
+  };
+}
+
+function mapServiceSongFromDb(row) {
+  return {
+    id: row.id,
+    serviceId: row.service_id,
+    songId: row.song_id,
+    category: row.category || "",
+    songKey: row.song_key || "",
+    notes: row.notes || "",
+    rowOrder: row.row_order ?? 0,
+    createdAt: row.created_at
+  };
+}
+
+async function fetchLeaders() {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from(LEADER_TABLE)
+      .select("id, name, status, notes, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map(mapLeaderFromDb);
+  } catch (error) {
+    console.error("Failed to fetch leaders:", error);
+    return [];
+  }
+}
+
+async function fetchSongs() {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from(SONG_TABLE)
+      .select("id, title, original_artist, language, tags, youtube_link, notes, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map(mapSongFromDb);
+  } catch (error) {
+    console.error("Failed to fetch songs:", error);
+    return [];
+  }
+}
+
+async function fetchServices() {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from(SERVICE_TABLE)
+      .select("id, service_date, leader_id, created_at")
+      .order("service_date", { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map(mapServiceFromDb);
+  } catch (error) {
+    console.error("Failed to fetch services:", error);
+    return [];
+  }
+}
+
+async function fetchServiceSongs() {
+  try {
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase
+      .from(SERVICE_SONG_TABLE)
+      .select("id, service_id, song_id, category, song_key, notes, row_order, created_at")
+      .order("row_order", { ascending: true });
+
+    if (error) throw error;
+    return (data || []).map(mapServiceSongFromDb);
+  } catch (error) {
+    console.error("Failed to fetch service songs:", error);
+    return [];
+  }
+}
+
+async function loadAllData() {
+  const [leaders, songs, services, serviceSongs] = await Promise.all([
+    fetchLeaders(),
+    fetchSongs(),
+    fetchServices(),
+    fetchServiceSongs()
+  ]);
+
+  leadersCache = leaders;
+  songsCache = songs;
+  servicesCache = services;
+  serviceSongsCache = serviceSongs;
+}
+
+function renderLeaderOptions(selectEl, selectedLeaderId = "") {
+  selectEl.innerHTML = '<option value="">Select leader</option>';
+
+  if (!leadersCache.length) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "No leaders available";
+    selectEl.appendChild(option);
+    return;
+  }
+
+  leadersCache.forEach((leader) => {
+    const option = document.createElement("option");
+    option.value = leader.id;
+    option.textContent = `${leader.name}${leader.status === "inactive" ? " (inactive)" : ""}`;
+    if (leader.id === selectedLeaderId) {
+      option.selected = true;
+    }
+    selectEl.appendChild(option);
+  });
+}
+
 function getSongById(songId) {
-  return getSongs().find((song) => song.id === songId) || null;
+  return songsCache.find((song) => song.id === songId) || null;
+}
+
+function getServiceSongsForService(serviceId) {
+  return serviceSongsCache
+    .filter((row) => row.serviceId === serviceId)
+    .sort((a, b) => a.rowOrder - b.rowOrder);
 }
 
 function getLeaderSongHistory(leaderId, songId) {
-  const services = getServices();
-
   const history = [];
+  const serviceMap = new Map(servicesCache.map((service) => [service.id, service]));
 
-  services.forEach((service) => {
-    if (service.leaderId !== leaderId) return;
+  serviceSongsCache.forEach((serviceSong) => {
+    if (serviceSong.songId !== songId) return;
 
-    (service.songs || []).forEach((song) => {
-      if (song.songId !== songId) return;
+    const service = serviceMap.get(serviceSong.serviceId);
+    if (!service || service.leaderId !== leaderId) return;
 
-      history.push({
-        serviceDate: service.serviceDate,
-        key: song.key,
-        category: song.category,
-        notes: song.notes || ""
-      });
+    history.push({
+      serviceDate: service.serviceDate,
+      key: serviceSong.songKey,
+      category: serviceSong.category,
+      notes: serviceSong.notes || ""
     });
   });
 
-  history.sort((a, b) => {
-    return new Date(b.serviceDate) - new Date(a.serviceDate);
-  });
-
+  history.sort((a, b) => new Date(b.serviceDate) - new Date(a.serviceDate));
   return history;
 }
 
@@ -102,7 +234,6 @@ function getKeyFrequency(history) {
 
   history.forEach((entry) => {
     if (!entry.key) return;
-
     frequency[entry.key] = (frequency[entry.key] || 0) + 1;
   });
 
@@ -133,9 +264,7 @@ function buildSongIntelligenceHTML(history) {
   }
 
   const latest = history[0];
-
   const frequency = getKeyFrequency(history);
-
   const mostUsedKey = getMostUsedKey(frequency);
 
   const frequencyHTML = Object.entries(frequency)
@@ -183,7 +312,6 @@ function buildSongIntelligenceHTML(history) {
 
       <div class="intelligence-section">
         <small class="intelligence-label">Key History</small>
-
         <div class="intelligence-pill-wrap">
           ${frequencyHTML}
         </div>
@@ -191,7 +319,6 @@ function buildSongIntelligenceHTML(history) {
 
       <div class="intelligence-section">
         <small class="intelligence-label">Previous Services</small>
-
         <div class="history-list">
           ${historyHTML}
         </div>
@@ -217,119 +344,37 @@ function songMatchesQuery(song, query) {
   return titleMatch || artistMatch || languageMatch || tagMatch;
 }
 
-function renderLeaderOptions(selectEl, selectedLeaderId = "") {
-  const leaders = getLeaders();
-
-  selectEl.innerHTML = '<option value="">Select leader</option>';
-
-  if (!leaders.length) {
-    const option = document.createElement("option");
-    option.value = "";
-    option.textContent = "No leaders available";
-    selectEl.appendChild(option);
-    return;
-  }
-
-  leaders.forEach((leader) => {
-    const option = document.createElement("option");
-    option.value = leader.id;
-    option.textContent = `${leader.name}${leader.status === "inactive" ? " (inactive)" : ""}`;
-    if (leader.id === selectedLeaderId) {
-      option.selected = true;
-    }
-    selectEl.appendChild(option);
-  });
+function autoSaveDraftFromForm() {
+  saveDraft(collectDraftFromForm());
 }
 
-function renderSelectedSundayCard(dateString) {
-  const selectedSundayCard = document.getElementById("selectedSundayCard");
-  const services = getServices();
-  const service = services.find((item) => item.serviceDate === dateString);
+function collectDraftFromForm() {
+  const serviceId = document.getElementById("serviceId").value.trim();
+  const serviceDate = document.getElementById("serviceDate").value;
+  const leaderSelect = document.getElementById("leaderSelect");
 
-  if (!dateString) {
-    selectedSundayCard.innerHTML = `
-      <p>Click a Sunday on the calendar to create or edit a service.</p>
-    `;
-    return;
-  }
-
-  if (!service) {
-    selectedSundayCard.innerHTML = `
-      <h3>${formatDateDisplay(dateString)}</h3>
-      <p><strong>Status:</strong> Open Sunday</p>
-      <p>No service has been saved for this Sunday yet.</p>
-    `;
-    return;
-  }
-
-  selectedSundayCard.innerHTML = `
-    <h3>${formatDateDisplay(service.serviceDate)}</h3>
-    <p><strong>Leader:</strong> ${service.leaderName || service.leaderId || "N/A"}</p>
-    <div class="song-block">
-      ${
-        service.songs && service.songs.length
-          ? service.songs
-              .map(
-                (song) => `
-                  <div class="mini-card">
-                    <p><strong>Category:</strong> ${song.category || "N/A"}</p>
-                    <p><strong>Song:</strong> ${song.songTitle || "N/A"}</p>
-                    <p><strong>Original Artist:</strong> ${song.originalArtist || "N/A"}</p>
-                    <p><strong>Key:</strong> ${song.key || "N/A"}</p>
-                    <p><strong>Notes:</strong> ${song.notes || "None"}</p>
-                  </div>
-                `
-              )
-              .join("")
-          : "<p>No songs added yet.</p>"
-      }
-    </div>
-
-    <div class="selected-service-actions">
-      <button type="button" class="secondary-btn delete-sunday-btn" data-date="${service.serviceDate}">
-        Delete Sunday
-      </button>
-    </div>
-  `;
-
-  const deleteBtn = selectedSundayCard.querySelector(".delete-sunday-btn");
-
-  deleteBtn.addEventListener("click", () => {
-    const confirmed = window.confirm(
-      `Delete the saved service for ${formatDateDisplay(service.serviceDate)}?`
-    );
-
-    if (!confirmed) return;
-
-    const updatedServices = getServices().filter(
-      (item) => item.serviceDate !== service.serviceDate
-    );
-
-    saveServices(updatedServices);
-
-    const serviceDateInput = document.getElementById("serviceDate");
-    const serviceIdInput = document.getElementById("serviceId");
-    const songRows = document.getElementById("songRows");
-    const plannerTitle = document.getElementById("plannerTitle");
-
-    clearDraft();
-
-    serviceIdInput.value = "";
-    plannerTitle.textContent = "Create Service";
-    serviceDateInput.value = service.serviceDate;
-    songRows.innerHTML = "";
-    songRows.appendChild(createSongRow());
-    renderLeaderOptions(document.getElementById("leaderSelect"), "");
-    renderSelectedSundayCard(service.serviceDate);
-    renderCalendar();
-    autoSaveDraftFromForm();
+  const rows = Array.from(document.querySelectorAll(".lineup-row")).map((row) => {
+    return {
+      rowId: row.dataset.rowId,
+      category: row.querySelector(".song-category").value,
+      songId: row.querySelector(".song-id").value,
+      key: row.querySelector(".song-key").value.trim(),
+      notes: row.querySelector(".song-notes").value.trim()
+    };
   });
+
+  return {
+    serviceId,
+    serviceDate,
+    leaderId: leaderSelect.value,
+    rows
+  };
 }
 
 function createSongRow(rowData = {}) {
   const row = document.createElement("div");
   row.className = "lineup-row";
-  row.dataset.rowId = rowData.rowId || generateRowId();
+  row.dataset.rowId = rowData.rowId || `row-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 
   row.innerHTML = `
     <div class="lineup-grid">
@@ -367,9 +412,8 @@ function createSongRow(rowData = {}) {
           <div class="song-search-results hidden"></div>
         </div>
 
-       <div class="selected-song-display hidden"></div>
-
-<div class="song-intelligence-wrapper hidden"></div>
+        <div class="selected-song-display hidden"></div>
+        <div class="song-intelligence-wrapper hidden"></div>
       </div>
 
       <label>
@@ -400,76 +444,13 @@ function createSongRow(rowData = {}) {
   const keyInput = row.querySelector(".song-key");
   const notesInput = row.querySelector(".song-notes");
 
-  function setSelectedSong(songId) {
-    songIdInput.value = songId || "";
-
-    const song = songId ? getSongById(songId) : null;
-
-    if (!song) {
-      selectedSongDisplay.classList.add("hidden");
-      selectedSongDisplay.innerHTML = "";
-      songResults.classList.remove("hidden");
-      renderSongResults();
-      return;
-    }
-
-    selectedSongDisplay.innerHTML = `
-      <div class="selected-song-chip">
-        <div>
-          <strong>${song.title}</strong>
-          <span>${song.originalArtist || "N/A"}</span>
-          <small>${(song.tags || []).join(", ") || "No tags"}</small>
-        </div>
-        <button type="button" class="secondary-btn change-song-btn">Change</button>
-      </div>
-    `;
-
-    selectedSongDisplay.classList.remove("hidden");
-    const leaderId = document.getElementById("leaderSelect").value;
-
-if (leaderId && songId) {
-  const history = getLeaderSongHistory(leaderId, songId);
-
-  intelligenceWrapper.innerHTML = buildSongIntelligenceHTML(history);
-
-  intelligenceWrapper.classList.remove("hidden");
-
-  if (!keyInput.value && history.length > 0) {
-    const frequency = getKeyFrequency(history);
-
-    const suggestedKey =
-      getMostUsedKey(frequency) || history[0].key;
-
-    keyInput.value = suggestedKey;
-  }
-} else {
-  intelligenceWrapper.classList.add("hidden");
-  intelligenceWrapper.innerHTML = "";
-}
-    songResults.classList.add("hidden");
-    songSearchInput.value = song.title;
-
-    const changeBtn = selectedSongDisplay.querySelector(".change-song-btn");
-    changeBtn.addEventListener("click", () => {
-      songIdInput.value = "";
-      selectedSongDisplay.classList.add("hidden");
-      selectedSongDisplay.innerHTML = "";
-      intelligenceWrapper.classList.add("hidden");
-intelligenceWrapper.innerHTML = "";
-      songSearchInput.value = "";
-      songSearchInput.focus();
-      renderSongResults();
-    });
-  }
-
   function renderSongResults() {
     const category = categorySelect.value;
     const query = songSearchInput.value;
-    const songs = getSongs();
 
     songResults.innerHTML = "";
 
-    const filteredSongs = songs.filter((song) => {
+    const filteredSongs = songsCache.filter((song) => {
       return songMatchesCategory(song, category) && songMatchesQuery(song, query);
     });
 
@@ -506,6 +487,72 @@ intelligenceWrapper.innerHTML = "";
     songResults.classList.remove("hidden");
   }
 
+  function refreshRowIntelligence() {
+    const leaderId = document.getElementById("leaderSelect").value;
+    const songId = songIdInput.value;
+
+    if (!leaderId || !songId) {
+      intelligenceWrapper.classList.add("hidden");
+      intelligenceWrapper.innerHTML = "";
+      return;
+    }
+
+    const history = getLeaderSongHistory(leaderId, songId);
+    intelligenceWrapper.innerHTML = buildSongIntelligenceHTML(history);
+    intelligenceWrapper.classList.remove("hidden");
+
+    if (!keyInput.value.trim() && history.length > 0) {
+      const frequency = getKeyFrequency(history);
+      const suggestedKey = getMostUsedKey(frequency) || history[0].key || "";
+      keyInput.value = suggestedKey;
+    }
+  }
+
+  function setSelectedSong(songId) {
+    songIdInput.value = songId || "";
+
+    const song = songId ? getSongById(songId) : null;
+
+    if (!song) {
+      selectedSongDisplay.classList.add("hidden");
+      selectedSongDisplay.innerHTML = "";
+      intelligenceWrapper.classList.add("hidden");
+      intelligenceWrapper.innerHTML = "";
+      songResults.classList.remove("hidden");
+      renderSongResults();
+      return;
+    }
+
+    selectedSongDisplay.innerHTML = `
+      <div class="selected-song-chip">
+        <div>
+          <strong>${song.title}</strong>
+          <span>${song.originalArtist || "N/A"}</span>
+          <small>${(song.tags || []).join(", ") || "No tags"}</small>
+        </div>
+        <button type="button" class="secondary-btn change-song-btn">Change</button>
+      </div>
+    `;
+
+    selectedSongDisplay.classList.remove("hidden");
+    songResults.classList.add("hidden");
+    songSearchInput.value = song.title;
+
+    const changeBtn = selectedSongDisplay.querySelector(".change-song-btn");
+    changeBtn.addEventListener("click", () => {
+      songIdInput.value = "";
+      selectedSongDisplay.classList.add("hidden");
+      selectedSongDisplay.innerHTML = "";
+      intelligenceWrapper.classList.add("hidden");
+      intelligenceWrapper.innerHTML = "";
+      songSearchInput.value = "";
+      songSearchInput.focus();
+      renderSongResults();
+    });
+
+    refreshRowIntelligence();
+  }
+
   function syncSongSearchState() {
     const category = categorySelect.value;
     const songId = songIdInput.value;
@@ -520,6 +567,8 @@ intelligenceWrapper.innerHTML = "";
       songIdInput.value = "";
       selectedSongDisplay.classList.add("hidden");
       selectedSongDisplay.innerHTML = "";
+      intelligenceWrapper.classList.add("hidden");
+      intelligenceWrapper.innerHTML = "";
       songSearchInput.value = "";
     }
 
@@ -533,6 +582,9 @@ intelligenceWrapper.innerHTML = "";
     if (!songIdInput.value) {
       selectedSongDisplay.classList.add("hidden");
       selectedSongDisplay.innerHTML = "";
+      intelligenceWrapper.classList.add("hidden");
+      intelligenceWrapper.innerHTML = "";
+
       if (!category) {
         songResults.classList.add("hidden");
         songResults.innerHTML = "";
@@ -544,6 +596,7 @@ intelligenceWrapper.innerHTML = "";
 
   categorySelect.addEventListener("change", () => {
     syncSongSearchState();
+    refreshRowIntelligence();
     autoSaveDraftFromForm();
   });
 
@@ -585,32 +638,221 @@ intelligenceWrapper.innerHTML = "";
   return row;
 }
 
-function collectDraftFromForm() {
-  const serviceId = document.getElementById("serviceId").value.trim();
-  const serviceDate = document.getElementById("serviceDate").value;
-  const leaderSelect = document.getElementById("leaderSelect");
+function renderSelectedSundayCard(dateString) {
+  const selectedSundayCard = document.getElementById("selectedSundayCard");
 
-  const rows = Array.from(document.querySelectorAll(".lineup-row")).map((row) => {
-    return {
-      rowId: row.dataset.rowId,
-      category: row.querySelector(".song-category").value,
-      songId: row.querySelector(".song-id").value,
-      key: row.querySelector(".song-key").value.trim(),
-      notes: row.querySelector(".song-notes").value.trim()
-    };
+  if (!dateString) {
+    selectedSundayCard.innerHTML = `
+      <p>Click a Sunday on the calendar to create or edit a service.</p>
+    `;
+    return;
+  }
+
+  const service = servicesCache.find((item) => item.serviceDate === dateString);
+
+  if (!service) {
+    selectedSundayCard.innerHTML = `
+      <h3>${formatDateDisplay(dateString)}</h3>
+      <p><strong>Open Sunday</strong></p>
+      <p>No service has been saved for this Sunday yet.</p>
+    `;
+    return;
+  }
+
+  const leader = leadersCache.find((item) => item.id === service.leaderId);
+  const serviceSongs = getServiceSongsForService(service.id);
+
+  selectedSundayCard.innerHTML = `
+    <h3>${formatDateDisplay(service.serviceDate)}</h3>
+    <p><strong>Leader:</strong> ${leader?.name || service.leaderId || "N/A"}</p>
+
+    <div class="song-block">
+      ${
+        serviceSongs.length
+          ? serviceSongs
+              .map((row) => {
+                const song = getSongById(row.songId);
+
+                return `
+                  <div class="mini-card">
+                    <p class="detail-line"><span class="detail-label detail-category">Category:</span> <span class="detail-value">${row.category || "N/A"}</span></p>
+                    <p class="detail-line"><span class="detail-label detail-song">Song:</span> <span class="detail-value">${song?.title || row.songId || "N/A"}</span></p>
+                    <p class="detail-line"><span class="detail-label detail-artist">Original Artist:</span> <span class="detail-value">${song?.originalArtist || "N/A"}</span></p>
+                    <p class="detail-line"><span class="detail-label detail-key">Key:</span> <span class="detail-value">${row.songKey || "N/A"}</span></p>
+                    <p class="detail-line"><span class="detail-label detail-notes">Notes:</span> <span class="detail-value">${row.notes || "None"}</span></p>
+                  </div>
+                `;
+              })
+              .join("")
+          : "<p>No songs added yet.</p>"
+      }
+    </div>
+
+    <div class="selected-service-actions">
+      <button type="button" class="secondary-btn delete-sunday-btn" data-id="${service.id}" data-date="${service.serviceDate}">
+        Delete Sunday
+      </button>
+    </div>
+  `;
+
+  const deleteBtn = selectedSundayCard.querySelector(".delete-sunday-btn");
+
+  deleteBtn.addEventListener("click", async () => {
+    const confirmed = window.confirm(
+      `Delete the saved service for ${formatDateDisplay(service.serviceDate)}?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const supabase = getSupabaseClient();
+
+      const { error } = await supabase
+        .from(SERVICE_TABLE)
+        .delete()
+        .eq("id", service.id)
+        .select("id");
+
+      if (error) throw error;
+
+      clearDraft();
+      await loadAllData();
+      resetFormForNewService(service.serviceDate);
+      renderCalendar();
+      renderSelectedSundayCard(service.serviceDate);
+      refreshAllRowIntelligence();
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert(error.message || "Could not delete the service.");
+    }
   });
-
-  return {
-    serviceId,
-    serviceDate,
-    leaderId: leaderSelect.value,
-    rows
-  };
 }
 
-function autoSaveDraftFromForm() {
-  const draft = collectDraftFromForm();
-  saveDraft(draft);
+function renderCalendar() {
+  const calendarGrid = document.getElementById("calendarGrid");
+  const monthPicker = document.getElementById("monthPicker");
+  const viewDate = new Date(`${monthPicker.value}-01T00:00:00`);
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+
+  const firstDayOfMonth = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startDay = firstDayOfMonth.getDay();
+
+  const selectedDate = document.getElementById("serviceDate").value;
+  const servicesByDate = new Map(
+    servicesCache.map((service) => [service.serviceDate, service])
+  );
+
+  const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  calendarGrid.innerHTML = "";
+
+  weekdayLabels.forEach((day) => {
+    const header = document.createElement("div");
+    header.className = "weekday-cell";
+    header.textContent = day;
+    calendarGrid.appendChild(header);
+  });
+
+  for (let i = 0; i < startDay; i += 1) {
+    const blank = document.createElement("div");
+    blank.className = "day-cell empty";
+    calendarGrid.appendChild(blank);
+  }
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = new Date(year, month, day);
+    const dateString = toDateInputValue(date);
+    const service = servicesByDate.get(dateString);
+    const dayOfWeek = date.getDay();
+    const isSunday = dayOfWeek === 0;
+    const isSaturday = dayOfWeek === 6;
+    const isSelected = selectedDate === dateString;
+    const nextSunday = new Date(year, month, day + 1);
+
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "day-cell";
+    cell.dataset.date = dateString;
+    cell.disabled = !isSunday && !isSaturday;
+
+    if (isSunday) cell.classList.add("is-sunday");
+    if (isSaturday) cell.classList.add("is-saturday");
+    if (!isSunday && !isSaturday) cell.classList.add("weekday-cell-type");
+    if (service) cell.classList.add("has-service");
+    if (isSelected) cell.classList.add("is-selected");
+
+    cell.innerHTML = `
+      <span class="day-number">${day}</span>
+      ${
+        isSunday
+          ? `
+            <span class="day-badge">${service ? "Saved" : "Sunday"}</span>
+            <span class="day-summary">
+              ${
+                service
+                  ? `${(leadersCache.find((item) => item.id === service.leaderId) || {}).name || "Leader"} • ${getServiceSongsForService(service.id).length} songs`
+                  : "Open service"
+              }
+            </span>
+          `
+          : isSaturday
+            ? `
+              <span class="day-badge">Rehearsal</span>
+              <span class="day-summary">
+                Rehearsal for ${formatDateDisplay(toDateInputValue(nextSunday))} Service
+              </span>
+            `
+            : `<span class="day-summary muted">Weekday</span>`
+      }
+    `;
+
+    if (isSunday || isSaturday) {
+      cell.addEventListener("click", () => {
+        autoSaveDraftFromForm();
+
+        if (isSunday) {
+          document.getElementById("serviceDate").value = dateString;
+          const service = servicesByDate.get(dateString);
+          if (service) {
+            loadServiceIntoForm(dateString);
+            renderSelectedSundayCard(dateString);
+          } else {
+            resetFormForNewService(dateString);
+            renderSelectedSundayCard(dateString);
+          }
+        } else {
+          renderSelectedSundayCard("");
+        }
+
+        renderCalendar();
+      });
+    }
+
+    calendarGrid.appendChild(cell);
+  }
+}
+
+function resetFormForNewService(dateString = "") {
+  const songRows = document.getElementById("songRows");
+  const plannerTitle = document.getElementById("plannerTitle");
+  const serviceIdInput = document.getElementById("serviceId");
+  const serviceDateInput = document.getElementById("serviceDate");
+  const leaderSelect = document.getElementById("leaderSelect");
+
+  plannerTitle.textContent = "Create Service";
+  serviceIdInput.value = "";
+  serviceDateInput.value = dateString || "";
+  leaderSelect.value = "";
+  songRows.innerHTML = "";
+  songRows.appendChild(createSongRow());
+
+  if (dateString) {
+    const current = new Date(`${dateString}T00:00:00`);
+    document.getElementById("monthPicker").value = toMonthInputValue(current);
+  }
 }
 
 function restoreDraftToForm(draft) {
@@ -635,160 +877,17 @@ function restoreDraftToForm(draft) {
   );
 }
 
-function renderCurrentServiceCard() {
-  const currentServiceCard = document.getElementById("currentServiceCard");
-  const services = getServices();
-
-  if (!services.length) {
-    currentServiceCard.innerHTML = "<p>No service records yet.</p>";
-    return;
-  }
-
-  const latestService = [...services].sort((a, b) => {
-    return new Date(b.serviceDate) - new Date(a.serviceDate);
-  })[0];
-
-  const leaderName = latestService.leaderName || latestService.leaderId || "N/A";
-
-  currentServiceCard.innerHTML = `
-    <h3>${formatDateDisplay(latestService.serviceDate)}</h3>
-    <p><strong>Leader:</strong> ${leaderName}</p>
-    <div class="song-block">
-      ${
-        latestService.songs && latestService.songs.length
-          ? latestService.songs
-              .map(
-                (song) => `
-                  <div class="mini-card">
-                    <p><strong>Category:</strong> ${song.category || "N/A"}</p>
-                    <p><strong>Song:</strong> ${song.songTitle || "N/A"}</p>
-                    <p><strong>Original Artist:</strong> ${song.originalArtist || "N/A"}</p>
-                    <p><strong>Key:</strong> ${song.key || "N/A"}</p>
-                    <p><strong>Notes:</strong> ${song.notes || "None"}</p>
-                  </div>
-                `
-              )
-              .join("")
-          : "<p>No songs added yet.</p>"
-      }
-    </div>
-  `;
-}
-
-function renderCalendar() {
-  const calendarGrid = document.getElementById("calendarGrid");
-  const monthPicker = document.getElementById("monthPicker");
-  const viewDate = new Date(`${monthPicker.value}-01T00:00:00`);
-
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth();
-
-  const firstDayOfMonth = new Date(year, month, 1);
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const startDay = firstDayOfMonth.getDay();
-
-  const servicesByDate = new Map(
-    getServices().map((service) => [service.serviceDate, service])
-  );
-
-  const selectedDate = document.getElementById("serviceDate").value;
-
-  const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-  calendarGrid.innerHTML = "";
-
-  weekdayLabels.forEach((day) => {
-    const header = document.createElement("div");
-    header.className = "weekday-cell";
-    header.textContent = day;
-    calendarGrid.appendChild(header);
-  });
-
-  for (let i = 0; i < startDay; i += 1) {
-    const blank = document.createElement("div");
-    blank.className = "day-cell empty";
-    calendarGrid.appendChild(blank);
-  }
-
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    const date = new Date(year, month, day);
-    const dateString = toDateInputValue(date);
-    const service = servicesByDate.get(dateString);
-    const dayOfWeek = date.getDay();
-const isSunday = dayOfWeek === 0;
-const isSaturday = dayOfWeek === 6;
-    const isSelected = selectedDate === dateString;
-
-    const cell = document.createElement("button");
-    cell.type = "button";
-    cell.className = "day-cell";
-    cell.dataset.date = dateString;
-    cell.disabled = !isSunday;
-
-    if (isSunday) cell.classList.add("is-sunday");
-if (isSaturday) cell.classList.add("is-saturday");
-if (!isSunday && !isSaturday) {
-  cell.classList.add("weekday-cell-type");
-}
-    if (service) cell.classList.add("has-service");
-    if (isSelected) cell.classList.add("is-selected");
-
-    cell.innerHTML = `
-      <span class="day-number">${day}</span>
-      ${
-  isSunday
-    ? `
-      <span class="day-badge">${service ? "Saved" : "Sunday"}</span>
-      <span class="day-summary">
-        ${
-          service
-            ? `${service.leaderName || "Leader"} • ${(service.songs || []).length} songs`
-            : "Open service"
-        }
-      </span>
-    `
-    : isSaturday
-      ? `
-        <span class="day-badge">Rehearsal</span>
-        <span class="day-summary">
-          Rehearsal for ${formatDateDisplay(
-            toDateInputValue(
-              new Date(year, month, day + 1)
-            )
-          )} Service
-        </span>
-      `
-      : `<span class="day-summary muted">Weekday</span>`
-}
-    `;
-
-    if (isSunday) {
-      cell.addEventListener("click", () => {
-        autoSaveDraftFromForm();
-        loadServiceIntoForm(dateString);
-        renderCalendar();
-        renderSelectedSundayCard(dateString);
-        window.scrollTo({
-          top: document.getElementById("selectedSundayCard").offsetTop - 20,
-          behavior: "smooth"
-        });
-      });
-    }
-
-    calendarGrid.appendChild(cell);
-  }
-}
-
 function loadServiceIntoForm(serviceOrDate) {
   const songRows = document.getElementById("songRows");
   const plannerTitle = document.getElementById("plannerTitle");
   const serviceIdInput = document.getElementById("serviceId");
   const serviceDateInput = document.getElementById("serviceDate");
   const leaderSelect = document.getElementById("leaderSelect");
+  const monthPicker = document.getElementById("monthPicker");
 
   const service =
     typeof serviceOrDate === "string"
-      ? getServices().find((item) => item.serviceDate === serviceOrDate)
+      ? servicesCache.find((item) => item.serviceDate === serviceOrDate)
       : serviceOrDate;
 
   if (!service) {
@@ -798,27 +897,33 @@ function loadServiceIntoForm(serviceOrDate) {
     leaderSelect.value = "";
     songRows.innerHTML = "";
     songRows.appendChild(createSongRow());
+
+    if (serviceDateInput.value) {
+      const current = new Date(`${serviceDateInput.value}T00:00:00`);
+      monthPicker.value = toMonthInputValue(current);
+    }
+
     saveDraft(collectDraftFromForm());
-    renderSelectedSundayCard(serviceDateInput.value);
     return;
   }
 
   plannerTitle.textContent = "Edit Service";
   serviceIdInput.value = service.id;
   serviceDateInput.value = service.serviceDate;
+  leaderSelect.value = service.leaderId;
 
-  renderLeaderOptions(leaderSelect, service.leaderId);
+  const serviceSongs = getServiceSongsForService(service.id);
 
   songRows.innerHTML = "";
 
-  (service.songs || []).forEach((song) => {
+  serviceSongs.forEach((row) => {
     songRows.appendChild(
       createSongRow({
-        rowId: song.rowId,
-        category: song.category,
-        songId: song.songId,
-        key: song.key,
-        notes: song.notes
+        rowId: row.id,
+        category: row.category,
+        songId: row.songId,
+        key: row.songKey,
+        notes: row.notes
       })
     );
   });
@@ -827,13 +932,155 @@ function loadServiceIntoForm(serviceOrDate) {
     songRows.appendChild(createSongRow());
   }
 
+  const current = new Date(`${service.serviceDate}T00:00:00`);
+  monthPicker.value = toMonthInputValue(current);
+
   saveDraft(collectDraftFromForm());
-  renderSelectedSundayCard(service.serviceDate);
+  refreshAllRowIntelligence();
+}
+
+async function saveServiceFromForm(event) {
+  event.preventDefault();
+
+  const serviceError = document.getElementById("serviceError");
+  const serviceId = document.getElementById("serviceId").value.trim();
+  const serviceDate = document.getElementById("serviceDate").value;
+  const leaderId = document.getElementById("leaderSelect").value;
+  const rows = Array.from(document.querySelectorAll(".lineup-row"));
+
+  serviceError.classList.add("hidden");
+
+  if (!serviceDate) {
+    serviceError.textContent = "Please choose a service date.";
+    serviceError.classList.remove("hidden");
+    return;
+  }
+
+  const dateObj = new Date(`${serviceDate}T00:00:00`);
+  if (dateObj.getDay() !== 0) {
+    serviceError.textContent = "Please choose a Sunday date for the service.";
+    serviceError.classList.remove("hidden");
+    return;
+  }
+
+  const duplicate = servicesCache.find(
+    (service) => service.serviceDate === serviceDate && service.id !== serviceId
+  );
+
+  if (duplicate) {
+    serviceError.textContent = `An existing record already exists for ${formatDateDisplay(serviceDate)}. Please edit/remove the completed form instead.`;
+    serviceError.classList.remove("hidden");
+    return;
+  }
+
+  if (!leaderId) {
+    serviceError.textContent = "Please select a leader.";
+    serviceError.classList.remove("hidden");
+    return;
+  }
+
+  if (!rows.length) {
+    serviceError.textContent = "Please add at least one song row.";
+    serviceError.classList.remove("hidden");
+    return;
+  }
+
+  const lineup = [];
+
+  for (let i = 0; i < rows.length; i += 1) {
+    const row = rows[i];
+    const category = row.querySelector(".song-category").value;
+    const songId = row.querySelector(".song-id").value;
+    const key = row.querySelector(".song-key").value.trim();
+    const notes = row.querySelector(".song-notes").value.trim();
+
+    if (!category || !songId || !key) {
+      serviceError.textContent = "Every song row must have a category, song, and key.";
+      serviceError.classList.remove("hidden");
+      return;
+    }
+
+    const song = getSongById(songId);
+    if (!song) {
+      serviceError.textContent = "One of the selected songs was not found. Please add it first.";
+      serviceError.classList.remove("hidden");
+      return;
+    }
+
+    lineup.push({
+      songId: song.id,
+      category,
+      key,
+      notes,
+      rowOrder: i
+    });
+  }
+
+  const leader = leadersCache.find((item) => item.id === leaderId);
+  if (!leader) {
+    serviceError.textContent = "Selected leader was not found. Please add them first.";
+    serviceError.classList.remove("hidden");
+    return;
+  }
+
+  try {
+    const supabase = getSupabaseClient();
+
+    const { data, error } = await supabase.rpc("save_service_with_songs", {
+      p_service_id: serviceId || null,
+      p_service_date: serviceDate,
+      p_leader_id: leader.id,
+      p_songs: lineup
+    });
+
+    if (error) throw error;
+
+    clearDraft();
+    await loadAllData();
+
+    const savedDate = serviceDate;
+    resetFormForNewService(savedDate);
+    renderCalendar();
+    renderSelectedSundayCard(savedDate);
+    refreshAllRowIntelligence();
+
+    if (data) {
+      document.getElementById("serviceId").value = data;
+    }
+  } catch (error) {
+    console.error("Service save failed:", error);
+    serviceError.textContent = error.message || "Could not save the service.";
+    serviceError.classList.remove("hidden");
+  }
+}
+
+function refreshAllRowIntelligence() {
+  document.querySelectorAll(".lineup-row").forEach((row) => {
+    const intelligenceWrapper = row.querySelector(".song-intelligence-wrapper");
+    const songId = row.querySelector(".song-id").value;
+    const leaderId = document.getElementById("leaderSelect").value;
+    const keyInput = row.querySelector(".song-key");
+
+    if (!leaderId || !songId) {
+      intelligenceWrapper.classList.add("hidden");
+      intelligenceWrapper.innerHTML = "";
+      return;
+    }
+
+    const history = getLeaderSongHistory(leaderId, songId);
+    intelligenceWrapper.innerHTML = buildSongIntelligenceHTML(history);
+    intelligenceWrapper.classList.remove("hidden");
+
+    if (!keyInput.value.trim() && history.length > 0) {
+      const frequency = getKeyFrequency(history);
+      const suggestedKey = getMostUsedKey(frequency) || history[0].key || "";
+      keyInput.value = suggestedKey;
+    }
+  });
 }
 
 function initCalendarPage() {
   const serviceForm = document.getElementById("serviceForm");
-  const plannerTitle = document.getElementById("plannerTitle");
   const serviceError = document.getElementById("serviceError");
   const addSongRowBtn = document.getElementById("addSongRowBtn");
   const clearDraftBtn = document.getElementById("clearDraftBtn");
@@ -845,26 +1092,31 @@ function initCalendarPage() {
   const prevMonthBtn = document.getElementById("prevMonthBtn");
   const nextMonthBtn = document.getElementById("nextMonthBtn");
   const serviceDateInput = document.getElementById("serviceDate");
+  const plannerTitle = document.getElementById("plannerTitle");
 
   const draft = getDraft();
-  const initialDate = draft && draft.serviceDate ? new Date(`${draft.serviceDate}T00:00:00`) : new Date();
+  const initialDate = draft && draft.serviceDate
+    ? new Date(`${draft.serviceDate}T00:00:00`)
+    : new Date();
 
   monthPicker.value = toMonthInputValue(initialDate);
 
-  renderLeaderOptions(leaderSelect, draft ? draft.leaderId : "");
-  renderSelectedSundayCard(draft ? draft.serviceDate : "");
-  renderCalendar();
+  leaderSelect.addEventListener("change", () => {
+    refreshAllRowIntelligence();
+    autoSaveDraftFromForm();
+    renderCalendar();
+  });
 
-  if (draft) {
-    restoreDraftToForm(draft);
-    plannerTitle.textContent = draft.serviceId ? "Edit Service" : "Create Service";
-  } else {
-    songRows.appendChild(createSongRow());
-  }
+  serviceDateInput.addEventListener("change", () => {
+    const dateValue = serviceDateInput.value;
+    if (!dateValue) return;
 
-  if (!songRows.children.length) {
-    songRows.appendChild(createSongRow());
-  }
+    const current = new Date(`${dateValue}T00:00:00`);
+    monthPicker.value = toMonthInputValue(current);
+    renderCalendar();
+    renderSelectedSundayCard(dateValue);
+    autoSaveDraftFromForm();
+  });
 
   prevMonthBtn.addEventListener("click", () => {
     const current = new Date(`${monthPicker.value}-01T00:00:00`);
@@ -884,17 +1136,6 @@ function initCalendarPage() {
     renderCalendar();
   });
 
-  serviceDateInput.addEventListener("change", () => {
-    const dateValue = serviceDateInput.value;
-    if (dateValue) {
-      const current = new Date(`${dateValue}T00:00:00`);
-      monthPicker.value = toMonthInputValue(current);
-      renderCalendar();
-      renderSelectedSundayCard(dateValue);
-      saveDraft(collectDraftFromForm());
-    }
-  });
-
   goToLeadersBtn.addEventListener("click", () => {
     autoSaveDraftFromForm();
     window.location.href = "leaders.html";
@@ -909,6 +1150,7 @@ function initCalendarPage() {
     songRows.appendChild(createSongRow());
     autoSaveDraftFromForm();
     renderCalendar();
+    refreshAllRowIntelligence();
   });
 
   clearDraftBtn.addEventListener("click", () => {
@@ -917,138 +1159,52 @@ function initCalendarPage() {
 
     clearDraft();
     serviceForm.reset();
-    document.getElementById("serviceId").value = "";
     plannerTitle.textContent = "Create Service";
     serviceError.classList.add("hidden");
     songRows.innerHTML = "";
-    renderLeaderOptions(leaderSelect, "");
     songRows.appendChild(createSongRow());
+    renderLeaderOptions(leaderSelect, "");
     renderSelectedSundayCard("");
     renderCalendar();
   });
 
   serviceForm.addEventListener("input", () => {
     autoSaveDraftFromForm();
-    renderCalendar();
   });
 
   serviceForm.addEventListener("change", () => {
     autoSaveDraftFromForm();
-    renderCalendar();
   });
 
-  serviceForm.addEventListener("submit", (event) => {
-    event.preventDefault();
+  serviceForm.addEventListener("submit", saveServiceFromForm);
 
-    serviceError.classList.add("hidden");
+  (async () => {
+    try {
+      await loadAllData();
 
-    const serviceId = document.getElementById("serviceId").value.trim() || generateServiceId();
-    const serviceDate = document.getElementById("serviceDate").value;
-    const leaderId = leaderSelect.value;
-    const leaders = getLeaders();
-    const songs = getSongs();
-    const services = getServices();
+      renderLeaderOptions(leaderSelect, draft ? draft.leaderId : "");
+      renderCalendar();
 
-    if (!serviceDate) {
-      serviceError.textContent = "Please choose a service date.";
-      serviceError.classList.remove("hidden");
-      return;
-    }
-
-    const dateObj = new Date(`${serviceDate}T00:00:00`);
-    if (dateObj.getDay() !== 0) {
-      serviceError.textContent = "Please choose a Sunday date for the service.";
-      serviceError.classList.remove("hidden");
-      return;
-    }
-
-    const existingServiceByDate = services.find((service) => service.serviceDate === serviceDate);
-    if (existingServiceByDate && existingServiceByDate.id !== serviceId) {
-      serviceError.textContent = `An existing record already exists for ${formatDateDisplay(serviceDate)}. Please edit/remove the completed form instead.`;
-      serviceError.classList.remove("hidden");
-      return;
-    }
-
-    if (!leaderId) {
-      serviceError.textContent = "Please select a leader.";
-      serviceError.classList.remove("hidden");
-      return;
-    }
-
-    const leader = leaders.find((item) => item.id === leaderId);
-    if (!leader) {
-      serviceError.textContent = "Selected leader was not found. Please add them first.";
-      serviceError.classList.remove("hidden");
-      return;
-    }
-
-    const rows = Array.from(document.querySelectorAll(".lineup-row"));
-
-    if (!rows.length) {
-      serviceError.textContent = "Please add at least one song row.";
-      serviceError.classList.remove("hidden");
-      return;
-    }
-
-    const lineup = [];
-
-    for (const row of rows) {
-      const category = row.querySelector(".song-category").value;
-      const songId = row.querySelector(".song-id").value;
-      const key = row.querySelector(".song-key").value.trim();
-      const notes = row.querySelector(".song-notes").value.trim();
-
-      if (!category || !songId || !key) {
-        serviceError.textContent = "Every song row must have a category, song, and key.";
-        serviceError.classList.remove("hidden");
-        return;
+      if (draft) {
+        restoreDraftToForm(draft);
+        plannerTitle.textContent = draft.serviceId ? "Edit Service" : "Create Service";
+        renderSelectedSundayCard(draft.serviceDate || "");
+      } else {
+        songRows.appendChild(createSongRow());
+        renderSelectedSundayCard("");
       }
 
-      const song = songs.find((item) => item.id === songId);
-      if (!song) {
-        serviceError.textContent = "One of the selected songs was not found. Please add it first.";
-        serviceError.classList.remove("hidden");
-        return;
+      if (!songRows.children.length) {
+        songRows.appendChild(createSongRow());
       }
 
-      lineup.push({
-        rowId: row.dataset.rowId,
-        category,
-        songId: song.id,
-        songTitle: song.title,
-        originalArtist: song.originalArtist || "",
-        key,
-        notes
-      });
+      refreshAllRowIntelligence();
+    } catch (error) {
+      console.error("Failed to initialize calendar:", error);
+      serviceError.textContent = "Could not load calendar data from Supabase.";
+      serviceError.classList.remove("hidden");
     }
-
-    const existingIndex = services.findIndex((service) => service.id === serviceId);
-
-    const serviceRecord = {
-      id: serviceId,
-      serviceDate,
-      leaderId: leader.id,
-      leaderName: leader.name,
-      songs: lineup
-    };
-
-    if (existingIndex >= 0) {
-      services[existingIndex] = serviceRecord;
-    } else {
-      services.unshift(serviceRecord);
-    }
-
-    saveServices(services);
-    clearDraft();
-    serviceForm.reset();
-    document.getElementById("serviceId").value = "";
-    plannerTitle.textContent = "Create Service";
-    songRows.innerHTML = "";
-    songRows.appendChild(createSongRow());
-    renderLeaderOptions(leaderSelect, "");
-    renderSelectedSundayCard(serviceDate);
-    renderCalendar();
-  });
+  })();
 }
 
-initCalendarPage();
+document.addEventListener("DOMContentLoaded", initCalendarPage);
