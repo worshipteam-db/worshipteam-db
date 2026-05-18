@@ -2078,3 +2078,29 @@ select {
   letter-spacing: 0.02em;
   color: var(--text);
 }
+
+.hero-copy {
+  max-width: 1200px;
+}
+
+.eyebrow-warning {
+  color: rgba(255, 220, 170, 0.78);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.footer-verse {
+  color: rgba(237, 242, 247, 0.18);
+  font-style: italic;
+  max-width: 80ch;
+  line-height: 1.5;
+}
+
+.site-footer {
+  max-width: 1400px;
+}
+
+.footer-verse {
+  max-width: 1200px;
+}
