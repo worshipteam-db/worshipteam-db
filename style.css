@@ -3223,3 +3223,20 @@ a {
 #serviceDate {
   scroll-margin-top: 16px;
 }
+
+@media (max-width: 720px) {
+  .weekday-cell,
+  .day-cell.empty,
+  .day-cell.weekday-cell-type,
+  .day-cell.is-saturday {
+    display: none !important;
+  }
+
+  .calendar-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .day-cell.is-sunday {
+    min-height: 96px;
+  }
+}
