@@ -8,41 +8,49 @@
 </head>
 <body>
   <header class="topbar">
-    <div>
-      <h1>WorshipTeam DB</h1>
-      <p>Church Worship Team Planning System</p>
+    <div class="topbar-inner">
+      <a class="brand-home" href="index.html" aria-label="Home">
+        <span class="home-icon" aria-hidden="true">🏠</span>
+        <span class="brand-text">WorshipTeam DB</span>
+      </a>
     </div>
   </header>
 
   <main class="container">
-    <section class="hero">
-      <h2>Welcome</h2>
-      <p>A simple hub for songs, leaders, weekly planning, and archives.</p>
+    <section class="hero hero-dashboard">
+      <p class="eyebrow">Life City Church of Christ Main's Worship Team Planning System</p>
+      <h2>Welcome!!</h2>
+      <p class="hero-copy">
+        Use the tabs to jump between Songs, Leaders, Archive, and the project Stack.
+        The live calendar below is the main place to plan, review, and edit services.
+      </p>
     </section>
 
-    <section class="grid">
-      <a class="card" href="pages/songs.html">
-        <h3>Songs</h3>
-        <p>View and manage song records.</p>
-      </a>
+    <nav class="dashboard-tabs" aria-label="Primary navigation">
+      <a class="dashboard-tab tab-songs" href="pages/songs.html">Songs</a>
+      <a class="dashboard-tab tab-leaders" href="pages/leaders.html">Leaders</a>
+      <a class="dashboard-tab tab-archive" href="pages/archive.html">Archive</a>
+      <a class="dashboard-tab tab-stack" href="stack.html">Stack</a>
+    </nav>
 
-      <a class="card" href="pages/calendar.html">
-        <h3>Calendar</h3>
-        <p>See weekly service planning.</p>
-      </a>
+    <section class="calendar-shell">
+      <div class="section-header">
+        <div>
+          <h3>Calendar</h3>
+          <p>Live service planner preview</p>
+        </div>
+        <a class="secondary-btn calendar-open-link" href="pages/calendar.html">Open full calendar</a>
+      </div>
 
-      <a class="card" href="pages/leaders.html">
-        <h3>Leaders</h3>
-        <p>Track worship leaders and their song lists.</p>
-      </a>
-
-      <a class="card" href="pages/archive.html">
-        <h3>Archive</h3>
-        <p>Review past services and song lineups.</p>
-      </a>
+      <div class="calendar-embed">
+        <iframe src="pages/calendar.html" title="Calendar preview"></iframe>
+      </div>
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <footer class="site-footer">
+    <span>© 2026 Glenn Bernard Pimentel</span>
+    <span>Built for Life City Church of Christ Main Worship Team</span>
+  </footer>
 </body>
 </html>

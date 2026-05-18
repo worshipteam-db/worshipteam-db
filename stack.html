@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Stack | WorshipTeam DB</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand-home" href="index.html" aria-label="Home">
+        <span class="home-icon" aria-hidden="true">🏠</span>
+        <span class="brand-text">WorshipTeam DB</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero hero-dashboard">
+      <p class="eyebrow">Project Stack & Roadmap</p>
+      <h2>Built with a modern web stack</h2>
+      <p class="hero-copy">
+        This project is one of my hobby builds. I am using it to show frontend structure,
+        backend data handling, deployment flow, and the features I plan to add next.
+      </p>
+    </section>
+
+    <section class="stack-grid">
+      <article class="stack-card stack-front">
+        <p class="stack-kicker">Frontend</p>
+        <h3>UI, layout, and navigation</h3>
+        <p>
+          HTML, CSS, and JavaScript with a custom mixer-inspired theme, reusable page sections,
+          calendar UI, cards, tabs, and responsive layout work.
+        </p>
+        <div class="stack-list">
+          <span class="stack-pill">HTML5</span>
+          <span class="stack-pill">CSS3</span>
+          <span class="stack-pill">Vanilla JS</span>
+          <span class="stack-pill">Responsive UI</span>
+          <span class="stack-pill">Tabbed navigation</span>
+        </div>
+      </article>
+
+      <article class="stack-card stack-backend">
+        <p class="stack-kicker">Backend / Data</p>
+        <h3>Shared database and service logic</h3>
+        <p>
+          Supabase Postgres stores songs, leaders, services, and service song rows.
+          Row Level Security and RPC functions support shared church planning data.
+        </p>
+        <div class="stack-list">
+          <span class="stack-pill">Supabase</span>
+          <span class="stack-pill">Postgres</span>
+          <span class="stack-pill">RLS</span>
+          <span class="stack-pill">RPC</span>
+          <span class="stack-pill">Realtime-ready</span>
+        </div>
+      </article>
+
+      <article class="stack-card stack-deploy">
+        <p class="stack-kicker">Deployment</p>
+        <h3>Online publishing and automatic updates</h3>
+        <p>
+          The site is deployed through Vercel and connected to GitHub, so every push from VS Code
+          can update the live version automatically.
+        </p>
+        <div class="stack-list">
+          <span class="stack-pill">Vercel</span>
+          <span class="stack-pill">GitHub</span>
+          <span class="stack-pill">Auto deploys</span>
+          <span class="stack-pill">HTTPS</span>
+          <span class="stack-pill">Preview builds</span>
+        </div>
+      </article>
+
+      <article class="stack-card stack-roadmap">
+        <p class="stack-kicker">Future roadmap</p>
+        <h3>Planned upgrades</h3>
+        <p>
+          These are the next things I want to add without rewriting the project.
+        </p>
+        <ul class="roadmap-list">
+          <li>Bootstrap or another layout helper if needed</li>
+          <li>Progressive Web App install support</li>
+          <li>App icon and splash screen setup</li>
+          <li>Authentication and role-based access later</li>
+          <li>Analytics dashboards and song history reports</li>
+          <li>Offline-friendly caching</li>
+          <li>Mobile-first refinements and tablet polish</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>© 2026 Glenn Bernard Pimentel</span>
+    <span>Stack Page for WorshipTeam DB</span>
+  </footer>
+</body>
+</html>
