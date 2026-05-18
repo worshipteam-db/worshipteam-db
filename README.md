@@ -1,6 +1,6 @@
 # WorshipTeam DB
 
-A Full-Stack Worship Ministry Planning System Built For Real Church Workflows.
+A Full-Stack Worship Ministry Planning System Built For LifeCity Church.
 
 ---
 
