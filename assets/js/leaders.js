@@ -1,43 +1,44 @@
-const LEADER_STORAGE_KEY = "worshipteam_leaders";
+const LEADER_TABLE = "leaders";
 
-const defaultLeaders = [
-  {
-    id: "leader-001",
-    name: "Leader A",
-    status: "active",
-    notes: ""
-  },
-  {
-    id: "leader-002",
-    name: "Leader B",
-    status: "active",
-    notes: ""
-  },
-  {
-    id: "leader-003",
-    name: "Leader C",
-    status: "inactive",
-    notes: "Inactive for now"
-  }
-];
+function getSupabaseClient() {
+  if (window.supabaseClient) return window.supabaseClient;
+  if (window.supabase && typeof window.supabase.from === "function") return window.supabase;
 
-function getLeaders() {
-  const storedLeaders = localStorage.getItem(LEADER_STORAGE_KEY);
-
-  if (storedLeaders) {
-    return JSON.parse(storedLeaders);
-  }
-
-  localStorage.setItem(LEADER_STORAGE_KEY, JSON.stringify(defaultLeaders));
-  return defaultLeaders;
+  throw new Error(
+    "Supabase client not found. Make sure your Supabase client script loads before leaders.js."
+  );
 }
 
-function saveLeaders(leaders) {
-  localStorage.setItem(LEADER_STORAGE_KEY, JSON.stringify(leaders));
+function mapLeaderFromDb(row) {
+  return {
+    id: row.id,
+    name: row.name || "",
+    status: row.status || "active",
+    notes: row.notes || ""
+  };
 }
 
-function generateLeaderId() {
-  return `leader-${Date.now()}`;
+function mapLeaderToDb(leader) {
+  return {
+    name: leader.name,
+    status: leader.status,
+    notes: leader.notes || ""
+  };
+}
+
+async function fetchLeaders() {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from(LEADER_TABLE)
+    .select("id, name, status, notes, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return (data || []).map(mapLeaderFromDb);
 }
 
 function initLeadersPage() {
@@ -54,7 +55,7 @@ function initLeadersPage() {
   const leaderStatusInput = document.getElementById("leaderStatus");
   const leaderNotesInput = document.getElementById("leaderNotes");
 
-  let leaders = getLeaders();
+  let leaders = [];
 
   function openForm(leader = null) {
     leaderFormSection.classList.remove("hidden");
@@ -90,8 +91,7 @@ function initLeadersPage() {
       const card = document.createElement("div");
       card.className = "song-card";
 
-      const statusLabel =
-        leader.status === "active" ? "Active" : "Inactive";
+      const statusLabel = leader.status === "active" ? "Active" : "Inactive";
 
       card.innerHTML = `
         <h3>${leader.name}</h3>
@@ -126,6 +126,16 @@ function initLeadersPage() {
     renderLeaders(filteredLeaders);
   }
 
+  async function loadAndRenderLeaders() {
+    try {
+      leaders = await fetchLeaders();
+      applySearch();
+    } catch (error) {
+      console.error("Failed to load leaders:", error);
+      leaderList.innerHTML = "<p>Could not load leaders from Supabase.</p>";
+    }
+  }
+
   toggleLeaderFormBtn.addEventListener("click", () => {
     if (leaderFormSection.classList.contains("hidden")) {
       openForm();
@@ -136,32 +146,50 @@ function initLeadersPage() {
 
   cancelLeaderFormBtn.addEventListener("click", closeForm);
 
-  leaderForm.addEventListener("submit", (event) => {
+  leaderForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const newLeader = {
-      id: leaderIdInput.value || generateLeaderId(),
-      name: leaderNameInput.value.trim(),
-      status: leaderStatusInput.value,
-      notes: leaderNotesInput.value.trim()
-    };
+    const name = leaderNameInput.value.trim();
+    const status = leaderStatusInput.value;
+    const notes = leaderNotesInput.value.trim();
 
-    const existingIndex = leaders.findIndex((leader) => leader.id === newLeader.id);
+    const payload = mapLeaderToDb({
+      name,
+      status,
+      notes
+    });
 
-    if (existingIndex >= 0) {
-      leaders[existingIndex] = newLeader;
-    } else {
-      leaders.unshift(newLeader);
+    try {
+      const supabase = getSupabaseClient();
+
+      if (leaderIdInput.value) {
+        const { error } = await supabase
+          .from(LEADER_TABLE)
+          .update(payload)
+          .eq("id", leaderIdInput.value)
+          .select();
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from(LEADER_TABLE)
+          .insert([payload])
+          .select();
+
+        if (error) throw error;
+      }
+
+      await loadAndRenderLeaders();
+      closeForm();
+    } catch (error) {
+      console.error("Leader save failed:", error);
+      alert(error.message || "Could not save the leader.");
     }
-
-    saveLeaders(leaders);
-    closeForm();
-    applySearch();
   });
 
   leaderSearchInput.addEventListener("input", applySearch);
 
-  renderLeaders(leaders);
+  loadAndRenderLeaders();
 }
 
-initLeadersPage();
+document.addEventListener("DOMContentLoaded", initLeadersPage);
