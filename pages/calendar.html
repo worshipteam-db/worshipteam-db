@@ -9,22 +9,99 @@
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <h1>Calendar</h1>
+      <div>
+        <h1>Calendar</h1>
+        <p>Weekly service planner</p>
+      </div>
       <a class="home-link" href="../index.html">Home</a>
     </div>
   </header>
 
   <main class="container">
     <section class="page-header">
-      <h2>Weekly Service Planning</h2>
-      <p>View the current service lineup and past weekly records.</p>
+      <h2>Sunday Service Calendar</h2>
+      <p>
+        Click a Sunday to create or edit a service record. Future Sundays can be planned in advance.
+      </p>
     </section>
 
-    <section id="currentService" class="service-card"></section>
+    <section class="planner-actions">
+      <button type="button" id="goToLeadersBtn" class="secondary-btn">Add / Edit Leaders</button>
+      <button type="button" id="goToSongsBtn" class="secondary-btn">Add / Edit Songs</button>
+    </section>
+
+    <section class="form-card calendar-card">
+      <div class="calendar-toolbar">
+        <button type="button" id="prevMonthBtn" class="secondary-btn">Prev</button>
+
+        <label class="month-picker">
+          <span class="label-text">
+            Month
+            <span class="required-mark">*</span>
+          </span>
+          <input type="month" id="monthPicker" />
+        </label>
+
+        <button type="button" id="nextMonthBtn" class="secondary-btn">Next</button>
+      </div>
+
+      <div class="calendar-legend">
+        <span><span class="legend-swatch sunday"></span> Sunday</span>
+        <span><span class="legend-swatch service"></span> Service exists</span>
+        <span><span class="legend-swatch selected"></span> Selected</span>
+      </div>
+
+      <div id="calendarGrid" class="calendar-grid"></div>
+    </section>
 
     <section class="section-spacer">
-      <h2>Past Services</h2>
-      <div id="serviceArchive" class="song-list"></div>
+      <h2>Selected Sunday</h2>
+      <div id="selectedSundayCard" class="service-card"></div>
+    </section>
+
+    <section class="section-spacer">
+      <div class="form-card">
+        <h3 id="plannerTitle">Create Service</h3>
+
+        <form id="serviceForm">
+          <input type="hidden" id="serviceId" />
+
+          <label>
+            <span class="label-text">
+              Service Date
+              <span class="required-mark">*</span>
+            </span>
+            <input type="date" id="serviceDate" required />
+          </label>
+
+          <label>
+            <span class="label-text">
+              Song Leader
+              <span class="required-mark">*</span>
+            </span>
+            <select id="leaderSelect" required>
+              <option value="">Select leader</option>
+            </select>
+          </label>
+
+          <div class="planner-section-header">
+            <div>
+              <h4>Song Lineup</h4>
+              <p class="helper-text">Choose a category first, then search songs tagged with that category.</p>
+            </div>
+            <button type="button" id="addSongRowBtn" class="action-btn">Add Song Row</button>
+          </div>
+
+          <p id="serviceError" class="error-text hidden"></p>
+
+          <div id="songRows" class="song-rows"></div>
+
+          <div class="form-actions">
+            <button type="submit" class="action-btn">Save Service</button>
+            <button type="button" id="clearDraftBtn" class="secondary-btn">Clear Draft</button>
+          </div>
+        </form>
+      </div>
     </section>
   </main>
 
