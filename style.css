@@ -1588,3 +1588,139 @@ select {
 .bottom-row-actions .action-btn {
   min-width: 220px;
 }
+
+.song-intelligence-wrapper {
+  margin-top: 12px;
+}
+
+.song-intelligence {
+  border: 1px solid rgba(46, 168, 255, 0.18);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17, 23, 30, 0.96) 0%,
+      rgba(13, 18, 24, 0.98) 100%
+    );
+
+  border-radius: 14px;
+
+  padding: 14px;
+
+  display: grid;
+  gap: 16px;
+}
+
+.song-intelligence.empty {
+  color: var(--muted);
+}
+
+.intelligence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.intelligence-box {
+  border: 1px solid rgba(255,255,255,0.06);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.03) 0%,
+      rgba(255,255,255,0.01) 100%
+    );
+
+  border-radius: 12px;
+
+  padding: 12px;
+
+  display: grid;
+  gap: 6px;
+}
+
+.intelligence-box small {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.intelligence-box strong {
+  color: #7fd0ff;
+  font-size: 1.15rem;
+}
+
+.intelligence-section {
+  display: grid;
+  gap: 10px;
+}
+
+.intelligence-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+}
+
+.intelligence-pill-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.intelligence-pill {
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 159, 67, 0.18) 0%,
+      rgba(255, 159, 67, 0.1) 100%
+    );
+
+  border: 1px solid rgba(255, 159, 67, 0.3);
+
+  padding: 8px 12px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.intelligence-pill strong {
+  color: #ffb15c;
+}
+
+.intelligence-pill span {
+  color: #ffe2be;
+  font-size: 0.85rem;
+}
+
+.history-list {
+  display: grid;
+  gap: 8px;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 12px;
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.03) 0%,
+      rgba(255,255,255,0.01) 100%
+    );
+
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.history-row span {
+  color: var(--muted);
+}
+
+.history-row strong {
+  color: #79f2c0;
+}

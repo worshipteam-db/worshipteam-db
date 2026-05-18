@@ -70,6 +70,136 @@ function getSongById(songId) {
   return getSongs().find((song) => song.id === songId) || null;
 }
 
+function getLeaderSongHistory(leaderId, songId) {
+  const services = getServices();
+
+  const history = [];
+
+  services.forEach((service) => {
+    if (service.leaderId !== leaderId) return;
+
+    (service.songs || []).forEach((song) => {
+      if (song.songId !== songId) return;
+
+      history.push({
+        serviceDate: service.serviceDate,
+        key: song.key,
+        category: song.category,
+        notes: song.notes || ""
+      });
+    });
+  });
+
+  history.sort((a, b) => {
+    return new Date(b.serviceDate) - new Date(a.serviceDate);
+  });
+
+  return history;
+}
+
+function getKeyFrequency(history) {
+  const frequency = {};
+
+  history.forEach((entry) => {
+    if (!entry.key) return;
+
+    frequency[entry.key] = (frequency[entry.key] || 0) + 1;
+  });
+
+  return frequency;
+}
+
+function getMostUsedKey(frequency) {
+  let topKey = "";
+  let topCount = 0;
+
+  Object.entries(frequency).forEach(([key, count]) => {
+    if (count > topCount) {
+      topKey = key;
+      topCount = count;
+    }
+  });
+
+  return topKey;
+}
+
+function buildSongIntelligenceHTML(history) {
+  if (!history.length) {
+    return `
+      <div class="song-intelligence empty">
+        <p>No previous history for this leader and song yet.</p>
+      </div>
+    `;
+  }
+
+  const latest = history[0];
+
+  const frequency = getKeyFrequency(history);
+
+  const mostUsedKey = getMostUsedKey(frequency);
+
+  const frequencyHTML = Object.entries(frequency)
+    .sort((a, b) => b[1] - a[1])
+    .map(([key, count]) => {
+      return `
+        <div class="intelligence-pill">
+          <strong>${key}</strong>
+          <span>${count}x</span>
+        </div>
+      `;
+    })
+    .join("");
+
+  const historyHTML = history
+    .slice(0, 5)
+    .map((entry) => {
+      return `
+        <div class="history-row">
+          <span>${formatDateDisplay(entry.serviceDate)}</span>
+          <strong>${entry.key}</strong>
+        </div>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="song-intelligence">
+      <div class="intelligence-grid">
+        <div class="intelligence-box">
+          <small>Most Used Key</small>
+          <strong>${mostUsedKey || "N/A"}</strong>
+        </div>
+
+        <div class="intelligence-box">
+          <small>Last Used Key</small>
+          <strong>${latest.key || "N/A"}</strong>
+        </div>
+
+        <div class="intelligence-box">
+          <small>Last Used Date</small>
+          <strong>${formatDateDisplay(latest.serviceDate)}</strong>
+        </div>
+      </div>
+
+      <div class="intelligence-section">
+        <small class="intelligence-label">Key History</small>
+
+        <div class="intelligence-pill-wrap">
+          ${frequencyHTML}
+        </div>
+      </div>
+
+      <div class="intelligence-section">
+        <small class="intelligence-label">Previous Services</small>
+
+        <div class="history-list">
+          ${historyHTML}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function songMatchesCategory(song, category) {
   if (!category) return true;
   return (song.tags || []).includes(category);
@@ -237,7 +367,9 @@ function createSongRow(rowData = {}) {
           <div class="song-search-results hidden"></div>
         </div>
 
-        <div class="selected-song-display hidden"></div>
+       <div class="selected-song-display hidden"></div>
+
+<div class="song-intelligence-wrapper hidden"></div>
       </div>
 
       <label>
@@ -264,6 +396,7 @@ function createSongRow(rowData = {}) {
   const songSearchInput = row.querySelector(".song-search");
   const songResults = row.querySelector(".song-search-results");
   const selectedSongDisplay = row.querySelector(".selected-song-display");
+  const intelligenceWrapper = row.querySelector(".song-intelligence-wrapper");
   const keyInput = row.querySelector(".song-key");
   const notesInput = row.querySelector(".song-notes");
 
@@ -292,6 +425,27 @@ function createSongRow(rowData = {}) {
     `;
 
     selectedSongDisplay.classList.remove("hidden");
+    const leaderId = document.getElementById("leaderSelect").value;
+
+if (leaderId && songId) {
+  const history = getLeaderSongHistory(leaderId, songId);
+
+  intelligenceWrapper.innerHTML = buildSongIntelligenceHTML(history);
+
+  intelligenceWrapper.classList.remove("hidden");
+
+  if (!keyInput.value && history.length > 0) {
+    const frequency = getKeyFrequency(history);
+
+    const suggestedKey =
+      getMostUsedKey(frequency) || history[0].key;
+
+    keyInput.value = suggestedKey;
+  }
+} else {
+  intelligenceWrapper.classList.add("hidden");
+  intelligenceWrapper.innerHTML = "";
+}
     songResults.classList.add("hidden");
     songSearchInput.value = song.title;
 
@@ -300,6 +454,8 @@ function createSongRow(rowData = {}) {
       songIdInput.value = "";
       selectedSongDisplay.classList.add("hidden");
       selectedSongDisplay.innerHTML = "";
+      intelligenceWrapper.classList.add("hidden");
+intelligenceWrapper.innerHTML = "";
       songSearchInput.value = "";
       songSearchInput.focus();
       renderSongResults();
