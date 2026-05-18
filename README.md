@@ -17,7 +17,7 @@ https://worshipteam-db.vercel.app/
 
 WorshipTeam DB is a real-world worship ministry management and planning system designed for churches to organize songs, worship leaders, service schedules, and weekly worship preparation.
 
-The platform was built to simplify communication between worship leaders and instrumental members by replacing traditional group-chat-based planning with a centralized cloud-based application.
+The platform was built to simplify communication between worship leaders and musicians by replacing traditional group-chat-based planning with a centralized cloud-based application.
 
 The system is now:
 - Fully deployed online
@@ -213,3 +213,4 @@ This project is open for personal, educational, and church ministry use.
 # 👨‍💻 Developer
 
 Developed By Glenn Bernard Pimentel
+- Email: glennbernardpimentel@gmail.com
