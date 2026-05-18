@@ -177,7 +177,7 @@ function renderArchive(services, leaders, songs, serviceSongs) {
   document.querySelectorAll(".open-service-btn").forEach((button) => {
     button.addEventListener("click", () => {
       const date = button.dataset.date;
-      window.location.href = `calendar.html?date=${encodeURIComponent(date)}`;
+      window.location.href = `calendar.html?date=${encodeURIComponent(date)}#serviceDate`;
     });
   });
 
