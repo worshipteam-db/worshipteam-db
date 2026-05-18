@@ -1098,7 +1098,13 @@ function initCalendarPage() {
   const plannerTitle = document.getElementById("plannerTitle");
 
   const draft = getDraft();
-  const initialDate = draft && draft.serviceDate
+
+  const urlParams = new URLSearchParams(window.location.search);
+const requestedDate = urlParams.get("date");
+
+  const initialDate = requestedDate
+  ? new Date(`${requestedDate}T00:00:00`)
+  : draft && draft.serviceDate
     ? new Date(`${draft.serviceDate}T00:00:00`)
     : new Date();
 
@@ -1186,16 +1192,22 @@ function initCalendarPage() {
       await loadAllData();
 
       renderLeaderOptions(leaderSelect, draft ? draft.leaderId : "");
+if (requestedDate) {
+  serviceDateInput.value = requestedDate;
+}
       renderCalendar();
 
-      if (draft) {
-        restoreDraftToForm(draft);
-        plannerTitle.textContent = draft.serviceId ? "Edit Service" : "Create Service";
-        renderSelectedSundayCard(draft.serviceDate || "");
-      } else {
-        songRows.appendChild(createSongRow());
-        renderSelectedSundayCard("");
-      }
+    if (draft) {
+  restoreDraftToForm(draft);
+  plannerTitle.textContent = draft.serviceId ? "Edit Service" : "Create Service";
+  renderSelectedSundayCard(draft.serviceDate || "");
+} else if (requestedDate) {
+  resetFormForNewService(requestedDate);
+  renderSelectedSundayCard(requestedDate);
+} else {
+  songRows.appendChild(createSongRow());
+  renderSelectedSundayCard("");
+}
 
       if (!songRows.children.length) {
         songRows.appendChild(createSongRow());

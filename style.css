@@ -2306,3 +2306,121 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 input[type="date"] {
   color-scheme: dark;
 }
+
+.detail-line {
+  display: flex;
+  gap: 6px;
+  line-height: 1.45;
+  flex-wrap: wrap;
+}
+
+.detail-label {
+  font-weight: 800;
+}
+
+.detail-category {
+  color: #7fd0ff;
+}
+
+.detail-song {
+  color: #ffb15c;
+}
+
+.detail-artist {
+  color: #d3a6ff;
+}
+
+.detail-key {
+  color: #79f2c0;
+}
+
+.detail-notes {
+  color: #ff8aa1;
+}
+
+.card-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.card-actions .action-btn,
+.card-actions .secondary-btn {
+  width: 140px;
+  height: 54px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.card-actions .action-btn {
+  border: 1px solid rgba(127, 208, 255, 0.32);
+  color: #d9f2ff;
+  background-image: linear-gradient(
+    180deg,
+    rgba(46, 168, 255, 0.06) 0%,
+    rgba(46, 168, 255, 0.02) 100%
+  ) !important;
+}
+
+.card-actions .action-btn:hover {
+  border-color: rgba(127, 208, 255, 0.58);
+  background-image: linear-gradient(
+    180deg,
+    rgba(46, 168, 255, 0.12) 0%,
+    rgba(46, 168, 255, 0.05) 100%
+  ) !important;
+}
+
+.card-actions .secondary-btn {
+  border: 1px solid rgba(255, 140, 160, 0.28);
+  color: #ffd7dc;
+  background-image: linear-gradient(
+    180deg,
+    rgba(217, 75, 90, 0.06) 0%,
+    rgba(217, 75, 90, 0.02) 100%
+  ) !important;
+}
+
+.card-actions .secondary-btn:hover {
+  border-color: rgba(255, 140, 160, 0.55);
+  background-image: linear-gradient(
+    180deg,
+    rgba(217, 75, 90, 0.12) 0%,
+    rgba(217, 75, 90, 0.05) 100%
+  ) !important;
+}
+
+.song-card p strong {
+  font-weight: 800;
+}
+
+.song-card p:nth-of-type(1) strong {
+  color: #63c0ff;
+}
+
+.song-card p:nth-of-type(2) strong {
+  color: #7fd8ff;
+}
+
+.song-card p:nth-of-type(3) strong {
+  color: #ffb15c;
+}
+
+.song-card p:nth-of-type(4) strong {
+  color: #ff6b7d;
+}
+
+.song-card p:nth-of-type(5) strong {
+  color: #79f2c0;
+}

@@ -7,35 +7,30 @@
   <link rel="stylesheet" href="../style.css" />
 </head>
 <body>
-<header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand-home" href="../index.html" aria-label="Home" target="_top">
-      <span class="home-icon" aria-hidden="true">🏠</span>
-      <span class="brand-text">WorshipTeam DB</span>
-    </a>
-  </div>
-</header>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand-home" href="../index.html" aria-label="Home">
+        <span class="home-icon" aria-hidden="true">🏠</span>
+        <span class="brand-text">WorshipTeam DB</span>
+      </a>
+    </div>
+  </header>
 
   <main class="container">
     <section class="page-header">
-      <h2>Past Service Archive</h2>
-      <p>Review past Sunday services, leaders, and song lineups.</p>
+      <h2>Archive</h2>
+      <p>Browse previously saved Sunday services.</p>
     </section>
 
     <section class="controls">
-      <input type="text" id="archiveSearchInput" placeholder="Search archive by date or leader..." />
+      <input type="text" id="archiveSearchInput" placeholder="Search by date, leader, song, or key..." />
     </section>
 
     <section id="archiveList" class="song-list"></section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
   <script src="../assets/js/archive.js"></script>
-  <footer class="site-footer">
-  <span>© 2026 Glenn Bernard Pimentel</span>
-  <span>Built for Life City Church of Christ Main Worship Team</span>
-<span class="footer-verse">
-  1 Corinthians 10:31 — “So whether you eat or drink or whatever you do, do it all for the glory of God.”
-</span>
-</footer>
 </body>
 </html>

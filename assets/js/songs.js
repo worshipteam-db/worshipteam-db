@@ -142,7 +142,7 @@ function initSongsPage() {
         <p><strong>Tags:</strong> ${(song.tags || []).join(", ") || "None"}</p>
         <p><strong>YouTube:</strong> ${
           song.youtubeLink
-            ? `<a href="${song.youtubeLink}" target="_blank" rel="noopener noreferrer">Open link</a>`
+           ? `<a href="${song.youtubeLink}" target="_blank" rel="noopener noreferrer">${song.youtubeLink}</a>`
             : "None"
         }</p>
         <p><strong>Notes:</strong> ${song.notes || "None"}</p>
