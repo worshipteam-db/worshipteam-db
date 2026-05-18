@@ -1578,3 +1578,13 @@ select {
 #selectedSundayCard {
   margin-top: 10px;
 }
+
+.bottom-row-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+}
+
+.bottom-row-actions .action-btn {
+  min-width: 220px;
+}
