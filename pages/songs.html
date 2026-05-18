@@ -8,12 +8,25 @@
 </head>
 <body>
   <header class="topbar">
+  <div class="topbar-inner">
     <h1>Songs</h1>
-  </header>
+    <a class="home-link" href="../index.html">Home</a>
+  </div>
+</header>
 
   <main class="container">
-    <p>Song management page coming soon.</p>
-    <p><a href="../index.html">Back Home</a></p>
+    <section class="page-header">
+      <h2>Song Catalog</h2>
+      <p>Browse songs that have been used or may be used for future services.</p>
+    </section>
+
+    <section class="controls">
+      <input type="text" id="searchInput" placeholder="Search songs..." />
+    </section>
+
+    <section id="songList" class="song-list"></section>
   </main>
+
+  <script src="../assets/js/songs.js"></script>
 </body>
 </html>
