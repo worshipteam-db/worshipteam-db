@@ -7,15 +7,27 @@
   <link rel="stylesheet" href="../style.css" />
 </head>
 <body>
- <header class="topbar">
-  <div class="topbar-inner">
-    <h1>Calendar</h1>
-    <a class="home-link" href="../index.html">Home</a>
-  </div>
-</header>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1>Calendar</h1>
+      <a class="home-link" href="../index.html">Home</a>
+    </div>
+  </header>
+
   <main class="container">
-    <p>Weekly planning page coming soon.</p>
-    <p><a href="../index.html">Back Home</a></p>
+    <section class="page-header">
+      <h2>Weekly Service Planning</h2>
+      <p>View the current service lineup and past weekly records.</p>
+    </section>
+
+    <section id="currentService" class="service-card"></section>
+
+    <section class="section-spacer">
+      <h2>Past Services</h2>
+      <div id="serviceArchive" class="song-list"></div>
+    </section>
   </main>
+
+  <script src="../assets/js/calendar.js"></script>
 </body>
 </html>

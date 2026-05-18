@@ -8,15 +8,30 @@
       {
         "category": "opening",
         "songId": "song-001",
-        "customTitle": "Song A",
+        "customTitle": "You Are The Greatest",
         "key": "G",
         "notes": ""
       },
       {
         "category": "praise",
         "songId": "song-002",
-        "customTitle": "Song B",
+        "customTitle": "You Are The Greatest",
         "key": "A",
+        "notes": ""
+      }
+    ]
+  },
+  {
+    "id": "service-2026-05-10",
+    "serviceDate": "2026-05-10",
+    "leaderId": "leader-002",
+    "status": "final",
+    "songs": [
+      {
+        "category": "worship",
+        "songId": "song-003",
+        "customTitle": "Song C",
+        "key": "F",
         "notes": ""
       }
     ]
