@@ -1,1 +1,1 @@
-console.log("WorshipTeam DB loaded");
+console.log("WorshipTeam DB Loaded");

@@ -2,22 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>WorshipTeam DB</title>
+
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <main class="container">
-    <h1>WorshipTeam DB</h1>
-    <p>A simple worship team database and planning page.</p>
 
-    <div class="buttons">
-      <button>Song List</button>
-      <button>Calendar</button>
-      <button>Leaders</button>
-    </div>
+<body>
+
+  <header>
+    <h1>WorshipTeam DB</h1>
+    <p>Church Worship Team Planning System</p>
+  </header>
+
+  <main>
+
+    <section class="card-container">
+
+      <a href="pages/songs.html" class="card">
+        <h2>Songs</h2>
+        <p>View and manage worship songs.</p>
+      </a>
+
+      <a href="pages/calendar.html" class="card">
+        <h2>Calendar</h2>
+        <p>Plan weekly worship schedules.</p>
+      </a>
+
+      <a href="pages/leaders.html" class="card">
+        <h2>Leaders</h2>
+        <p>Manage worship leaders and song lists.</p>
+      </a>
+
+    </section>
+
   </main>
 
   <script src="script.js"></script>
+
 </body>
 </html>
