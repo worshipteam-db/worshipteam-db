@@ -2424,3 +2424,25 @@ input[type="date"] {
 .song-card p:nth-of-type(5) strong {
   color: #79f2c0;
 }
+
+button svg,
+a svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2;
+  flex-shrink: 0;
+}
+
+button,
+a {
+  gap: 8px;
+}
+
+.card-actions button,
+.dashboard-tab,
+.brand-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}

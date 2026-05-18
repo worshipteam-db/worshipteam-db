@@ -167,7 +167,6 @@ function renderArchive(services, leaders, songs, serviceSongs) {
   <i data-lucide="trash-2"></i>
   <span>Delete</span>
 </button>
-          Delete
         </button>
       </div>
     `;
