@@ -2,43 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WorshipTeam DB</title>
-
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-
-  <header>
-    <h1>WorshipTeam DB</h1>
-    <p>Church Worship Team Planning System</p>
+  <header class="topbar">
+    <div>
+      <h1>WorshipTeam DB</h1>
+      <p>Church Worship Team Planning System</p>
+    </div>
   </header>
 
-  <main>
-
-    <section class="card-container">
-
-      <a href="pages/songs.html" class="card">
-        <h2>Songs</h2>
-        <p>View and manage worship songs.</p>
-      </a>
-
-      <a href="pages/calendar.html" class="card">
-        <h2>Calendar</h2>
-        <p>Plan weekly worship schedules.</p>
-      </a>
-
-      <a href="pages/leaders.html" class="card">
-        <h2>Leaders</h2>
-        <p>Manage worship leaders and song lists.</p>
-      </a>
-
+  <main class="container">
+    <section class="hero">
+      <h2>Welcome</h2>
+      <p>A simple hub for songs, leaders, weekly planning, and archives.</p>
     </section>
 
+    <section class="grid">
+      <a class="card" href="pages/songs.html">
+        <h3>Songs</h3>
+        <p>View and manage song records.</p>
+      </a>
+
+      <a class="card" href="pages/calendar.html">
+        <h3>Calendar</h3>
+        <p>See weekly service planning.</p>
+      </a>
+
+      <a class="card" href="pages/leaders.html">
+        <h3>Leaders</h3>
+        <p>Track worship leaders and their song lists.</p>
+      </a>
+
+      <a class="card" href="pages/archive.html">
+        <h3>Archive</h3>
+        <p>Review past services and song lineups.</p>
+      </a>
+    </section>
   </main>
 
   <script src="script.js"></script>
-
 </body>
 </html>
