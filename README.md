@@ -2,6 +2,7 @@
 
 A Full-Stack Worship Ministry Planning System Built For LifeCity Church.
 
+React Branch - May 2026
 ---
 
 ## ✨ Live Application
