@@ -1,0 +1,179 @@
+:root {
+  color-scheme: dark;
+
+  --bg: #0f1318;
+  --panel: #171c22;
+  --panel-2: #1d242c;
+
+  --text: #edf2f7;
+  --muted: #9aa7b5;
+
+  --blue: #63c0ff;
+  --green: #79f2c0;
+  --orange: #ffb15c;
+  --purple: #d39cff;
+
+  --border: rgba(255,255,255,0.08);
+
+  --shadow:
+    0 12px 30px rgba(0,0,0,0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    system-ui,
+    sans-serif;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #18212b 0%,
+      #0f1318 55%
+    );
+
+  color: var(--text);
+}
+
+.app-shell {
+  min-height: 100vh;
+
+  display: grid;
+  place-items: center;
+
+  padding: 32px;
+}
+
+.hero-card {
+  width: min(900px, 100%);
+
+  padding: 48px;
+
+  border-radius: 28px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.04) 0%,
+      rgba(255,255,255,0.02) 100%
+    );
+
+  border: 1px solid var(--border);
+
+  box-shadow: var(--shadow);
+
+  backdrop-filter: blur(18px);
+}
+
+.eyebrow {
+  color: var(--blue);
+
+  font-size: 0.82rem;
+
+  letter-spacing: 0.16em;
+
+  text-transform: uppercase;
+
+  font-weight: 800;
+
+  margin-bottom: 18px;
+}
+
+h1 {
+  margin: 0;
+
+  font-size: clamp(3rem, 7vw, 5rem);
+
+  line-height: 0.95;
+}
+
+.hero-copy {
+  margin-top: 22px;
+
+  max-width: 60ch;
+
+  color: var(--muted);
+
+  font-size: 1.05rem;
+
+  line-height: 1.7;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+
+  margin-top: 34px;
+
+  flex-wrap: wrap;
+}
+
+button {
+  border: none;
+
+  height: 56px;
+
+  padding: 0 24px;
+
+  border-radius: 16px;
+
+  font-size: 0.98rem;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.16s ease,
+    opacity 0.16s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+.primary-btn {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(99, 192, 255, 0.18) 0%,
+      rgba(99, 192, 255, 0.08) 100%
+    );
+
+  border: 1px solid rgba(99,192,255,0.35);
+
+  color: #dff5ff;
+}
+
+.secondary-btn {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 177, 92, 0.16) 0%,
+      rgba(255, 177, 92, 0.06) 100%
+    );
+
+  border: 1px solid rgba(255,177,92,0.28);
+
+  color: #ffe4bf;
+}
+
+@media (max-width: 720px) {
+  .hero-card {
+    padding: 28px;
+    border-radius: 22px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+}
